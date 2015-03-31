@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<search>
+    <!-- 每次重新开始 -->
+<!--     <update>false</update> -->
+	<seeds update="false" depth="10">
+	   <value>http://www.gdufs.edu.cn/</value>
+<!--        <value>http://www.hao123.com/</value> -->
+<!-- 	   <value>http://www.mxfy.com/</value> -->
+	</seeds>
+	<urlfinishupdate>true</urlfinishupdate>
+	<crawlthread update="true">
+	   <value>8</value>
+	</crawlthread>
+	<pagethread>
+	   <value>1</value>
+	</pagethread>
+	
+	<data basepath="G:/gdufs_search">
+	   <page dir="page" extend="pg"/>
+	   <wordurls dir="wordurls" extend="wus"/>
+	   <wordurlpos dir="wordurlpos" extend="wup"/>
+	</data>
+	   
+	<!-- 分词、词性标注、实体标注、依存句法分析的模型路径 -->
+	<model type="cws">
+	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/cws.model</value>
+	</model>
+	<model type="pos">
+	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/pos.model</value>
+	</model>
+	<model type="ner">
+	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/ner.model</value>
+	</model>
+	
+<!-- 	<timeout>5000</timeout> -->
+</search>
