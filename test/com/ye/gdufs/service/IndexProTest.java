@@ -4,13 +4,13 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class PageProTest {
+public class IndexProTest {
 
 	@Test
 	public void test() {
-		CreateIndexPro.getInstance().start();
+		IndexPro.getInstance().start();
 	}
 	public static void main(String[] args) {
-		new PageProTest().test();
+		new IndexProTest().test();
 	}
 }

@@ -26,6 +26,10 @@ public class SentenceHandler {
 	}
 
 	public SentenceHandler analyze(String str, AnalyzePos analyzePos) throws Exception {
+		str = str.trim();
+		if(str.equals("")){
+			throw new Exception("The string to be ananlyze is empty after trim()");
+		}
 		clean();
 		this.sentence = str;
 		switch (analyzePos) {

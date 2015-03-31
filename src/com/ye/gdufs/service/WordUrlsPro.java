@@ -47,7 +47,7 @@ public class WordUrlsPro {
 		uuidWusMap.remove(uuid);
 	}
 
-	public void rsave(Session session) throws Exception {
+	public synchronized void rsave(Session session) throws Exception {
 		operation(new Op(){
 			@Override
 			public void operation(WordUrlsDao wusd) throws Exception {
@@ -55,7 +55,7 @@ public class WordUrlsPro {
 			}
 		});		
 	}
-	public void rrollback() throws Exception{
+	public synchronized void rrollback() throws Exception{
 		operation(new Op(){
 			@Override
 			public void operation(WordUrlsDao wusd) throws Exception {
@@ -63,7 +63,7 @@ public class WordUrlsPro {
 			}
 		});		
 	}
-	public void save() throws Exception {
+	public synchronized void save() throws Exception {
 		operation(new Op(){
 			@Override
 			public void operation(WordUrlsDao wusd) throws Exception {

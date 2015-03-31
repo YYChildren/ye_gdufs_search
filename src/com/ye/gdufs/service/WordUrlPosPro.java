@@ -11,7 +11,6 @@ import org.hibernate.Session;
 
 import com.ye.gdufs.dao.WordUrlPosDao;
 import com.ye.gdufs.dao.WordUrlPosDaoImpl;
-import com.ye.gdufs.dao.WordUrlsDao;
 import com.ye.gdufs.model.WordUrlPos;
 import com.ye.gdufs.model.WordUrlPosPk;
 import com.ye.gdufs.model.WordUrlPosSer;
@@ -26,7 +25,7 @@ public class WordUrlPosPro {
 	}
 	
 	private void putKey(WordUrlPosPk pk) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		if(wupMap.containsKey(pk)){
+		if(wupMap.containsKey(pk) && wupSerMap.containsKey(pk)){
 			return;
 		}
 		WordUrlPos wup = new WordUrlPos(); 
@@ -34,9 +33,6 @@ public class WordUrlPosPro {
 		String serName = MsgUtil.msgDigest(pk.getWord() + pk.getUrlMd5()); 
 		wup.setSerName(serName);
 		wupMap.put(pk, wup);
-		if(wupSerMap.containsKey(pk)){
-			return;
-		}
 		WordUrlPosSer wupSer = new WordUrlPosSer(); 
 		wupSerMap.put(pk, wupSer);
 	}

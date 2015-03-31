@@ -15,8 +15,9 @@ import com.ye.gdufs.util.Misc;
 
 public class WordUrlsDaoImpl extends SearchPath implements WordUrlsDao{
 
-	WordUrls wus;
-	WordUrlsSer wusSer;
+	private WordUrls wus;
+	private WordUrlsSer wusSer;
+	private WordUrlsSer oldWusSer;
 	private static String[] info;
 	static{
 		info = GlobalArgs.getWordUrlsInfo(); 
@@ -69,12 +70,28 @@ public class WordUrlsDaoImpl extends SearchPath implements WordUrlsDao{
 	}
 	@Override
 	public void rrollback(){
-		if(file.exists()){
-			file.delete();
+		if(file.exists() && oldWusSer != null){
+			try {
+				Misc.writeObject(file, oldWusSer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	@Override
 	public void serSave() throws FileNotFoundException, IOException {
+		oldWusSer = null;
+		if(file.exists()){
+			try {
+				oldWusSer =  (WordUrlsSer) Misc.readObject(file);
+			} catch (ClassNotFoundException e) {
+				oldWusSer= null;
+				e.printStackTrace();
+			}
+		}
+		if(oldWusSer != null){
+			wusSer.getUrlMd5s().addAll(oldWusSer.getUrlMd5s());
+		}
 		Misc.writeObject(file, wusSer);
 	}
 	

@@ -25,42 +25,42 @@ import com.ye.gdufs.util.MsgUtil;
 import com.ye.gdufs.util.Paragraph;
 import com.ye.gdufs.util.SentenceHandler;
 
-public final class CreateIndexPro implements java.io.Serializable{
+public final class IndexPro implements java.io.Serializable{
 	private static final long serialVersionUID = -7940609119323972989L;
 	private final static String key = "createindexpro";
-	private static CreateIndexPro pagePro = null;
+	private static IndexPro indexPro = null;
 		
 	private long startId;
 	private Boolean isStarted = false;
 		
-	public static CreateIndexPro getInstance() {
-		if (pagePro == null) {
+	public static IndexPro getInstance() {
+		if (indexPro == null) {
 			syncInit();
 		}
-		return CreateIndexPro.pagePro;
+		return IndexPro.indexPro;
 	}
 
 	private static synchronized void syncInit() {
-		if (CreateIndexPro.pagePro == null) {
-			CreateIndexPro.pagePro = getPagePro();
+		if (IndexPro.indexPro == null) {
+			IndexPro.indexPro = getIndexPro();
 		}
 	}
 
-	private static CreateIndexPro getPagePro() {
-		CreateIndexPro p;
+	private static IndexPro getIndexPro() {
+		IndexPro p;
 		try {
 			p = getDump();
 			if(p == null){
-				p =  new CreateIndexPro();
+				p =  new IndexPro();
 			}
 		} catch (Exception e) {
-			p =  new CreateIndexPro();
+			p =  new IndexPro();
 			e.printStackTrace();
 		}
 		return p;
 	}
 
-	private CreateIndexPro() {
+	private IndexPro() {
 		startId = 1;
 	}
 	
@@ -76,8 +76,12 @@ public final class CreateIndexPro implements java.io.Serializable{
 			WordUrlsPro wusPro = new WordUrlsPro();
 			int retryTime = 0;
 			int nThreads = GlobalArgs.getPageThread();
+			//			//test
+			//			startId = 67;
 			while (isStarted) {
 				long endId = CrawlDataDaoImpl.getMaxId() + 1;
+				//				//test
+				//				endId=68;
 				if (startId < endId) {
 					retryTime = 0;
 				} else {
@@ -95,10 +99,9 @@ public final class CreateIndexPro implements java.io.Serializable{
 					}
 				}
 				while (startId < endId) {
-
 					long tempStep = endId - startId;
-					int step = tempStep > (long) nThreads ? nThreads: (int) tempStep;
-					for (int i = 0; i < step; ++startId) {
+					int step = tempStep < (long) nThreads ? (int) tempStep:nThreads;
+					for (int i = 0; i < step; ++startId,++i) {
 						System.out.println("---------------------id=" + startId+ "--------------------");
 						new PageProThread(startId, wusPro).run();
 					}
@@ -135,8 +138,8 @@ public final class CreateIndexPro implements java.io.Serializable{
 	private static void dump(java.io.Serializable o) throws Exception {
 		Misc.dumpObject(key, o);
 	}
-	private static CreateIndexPro getDump() throws Exception{
-		return (CreateIndexPro) Misc.getDumpObject(key);
+	private static IndexPro getDump() throws Exception{
+		return (IndexPro) Misc.getDumpObject(key);
 	}
 
 	class PageProThread implements Runnable{
@@ -167,10 +170,20 @@ public final class CreateIndexPro implements java.io.Serializable{
 				}
 				String content = cdd.getContent();
 				Document html = Jsoup.parse(content);
+				String title = html.title().trim();
+				if(title.equals("")){
+					return;
+				}
+				String body = html.body().toString();
+				List<String> para = Paragraph.extractSentence(body);
+				if(para.isEmpty()){
+					return;
+				}
 				String contentMd5 = Misc.getContentMd5(html);
 				if(new PageDaoImpl().isExistContentMd5(contentMd5)){
 					return;
 				}
+				
 				
 				//-----------------create----------------------------//
 				create();
@@ -184,7 +197,7 @@ public final class CreateIndexPro implements java.io.Serializable{
 				Set<String> wordAreadyPro = new HashSet<String>();
 				//-------------------------------------------------------begin of title-----------------------------------------------------------//
 				System.out.println("-------------------------------------------------------------title begin-------------------------------------------------------------");
-				String title = html.title().trim();
+				
 				SentenceHandler shTitle = Misc.analyzeSentence(title);
 				int titleFrequency = shTitle.getSize();
 				List<String> titleSegments = shTitle.getSegs();
@@ -224,8 +237,6 @@ public final class CreateIndexPro implements java.io.Serializable{
 				
 				//-------------------------------------------------------begin of body-----------------------------------------------------------//
 				System.out.println("-------------------------------------------------------------body begin-------------------------------------------------------------");
-				String body = html.body().toString();
-				List<String> para = Paragraph.extractSentence(body);
 				int bodyFrequency = 0;
 				List<List<String>> bodySegments = new ArrayList<>();
 				List<List<String>> bodyPostags = new ArrayList<>();
