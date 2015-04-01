@@ -16,6 +16,19 @@ import com.ye.gdufs.util.SentenceHandler;
 public class ATest {
 	
 	@Test
+	public void testHex(){
+		long seed1 = -123456789;
+	    System.out.println(Long.toUnsignedString(seed1, 1));
+	}
+	@Test
+	public void testNum(){
+		long x = Long.MAX_VALUE;
+		x = x + x;
+		x = x + x;
+		System.out.println(x);
+	}
+	
+	@Test
 	public void test() throws Exception{
 		SHFactory.getInstance().buildHandler().analyze("                ");
 	}

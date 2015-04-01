@@ -331,7 +331,7 @@ public final class IndexPro implements java.io.Serializable{
 					public Object execute(Session session) throws Exception {
 						pageProLocal.rsave(session);
 						wupProLocal.rsave(session);
-						wusPro.psavel(uuid,wusProLocal);
+						wusPro.psave(uuid,wusProLocal);
 						return null;
 					}
 				};

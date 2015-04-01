@@ -34,7 +34,7 @@ public class WordUrlsPro {
 	public synchronized void clear(){
 		wuMd5sMap.clear();
 	}
-	public synchronized void psavel(UUID uuid, WordUrlsPro wusProLocal) {
+	public synchronized void psave(UUID uuid, WordUrlsPro wusProLocal) {
 		if(uuidWusMap == null){
 			uuidWusMap = new HashMap<>();
 		}
