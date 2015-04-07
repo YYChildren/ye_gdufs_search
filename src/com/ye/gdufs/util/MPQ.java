@@ -1,13 +1,14 @@
 package com.ye.gdufs.util;
 
 public class MPQ {
+	private final int CRYPTO_LEN = 0x500;
 	private final int TYPE = 1;
 	private long[] cryptTable; 
 	private static class MPQIn{
 		private static MPQ mpq = new MPQ();
 	}
 	private MPQ(){
-		cryptTable = new long[0x500];
+		cryptTable = new long[CRYPTO_LEN];
 		prepare_crypt_table();
 	}
 	public static MPQ getInstance(){
@@ -47,7 +48,7 @@ public class MPQ {
 	    int ch;
 	    for(char c : key){
 	        ch = Character.toUpperCase(c);
-	        seed1 = cryptTable[(typeL ) + ch] ^ (seed1 + seed2);
+	        seed1 = cryptTable[(typeL + ch) % CRYPTO_LEN] ^ (seed1 + seed2);
 	        seed2 = ch + seed1 + seed2 + (seed2 << 5) + 3;
 	    }
 	    return seed1;

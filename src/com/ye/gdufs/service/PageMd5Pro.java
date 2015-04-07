@@ -18,12 +18,12 @@ public class PageMd5Pro {
 	public static PageMd5Pro getInstance(){
 		return pmPro;
 	}
-	public static  PageMd5Pro getNewInstance(){
-		return PageMd5ProIn.newInstance();
+	public static  PageMd5Pro updateInstance(){
+		return PageMd5ProIn.updateInstance();
 	}
 	private static class PageMd5ProIn{
 		private static PageMd5Pro pmPro = new PageMd5Pro();
-		private static PageMd5Pro newInstance(){
+		private static PageMd5Pro updateInstance(){
 			synchronized(pmPro){
 				pmPro.rsave();
 				pmPro.init();

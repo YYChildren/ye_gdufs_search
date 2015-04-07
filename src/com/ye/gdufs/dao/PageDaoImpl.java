@@ -29,6 +29,7 @@ public class PageDaoImpl implements PageDao {
 		super();
 		this.page = page;
 		this.pageSer = pageSer;
+		setPath();
 	}
 	public Page getPage() {
 		return page;

@@ -1,6 +1,9 @@
 package com.ye.gdufs.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,7 @@ import com.ye.gdufs.util.SentenceHandler;
 public final class IndexPro implements java.io.Serializable{
 	private static final long serialVersionUID = -7940609119323972989L;
 	private final static String key = "indexpro";
+	private final static int WORD_MAX_SIZE = 64;
 	private static IndexPro indexPro = null;
 		
 	private long startId;
@@ -44,9 +48,9 @@ public final class IndexPro implements java.io.Serializable{
 	}
 
 	private static IndexPro getIndexPro() {
-		IndexPro p;
+		IndexPro p = null;
 		try {
-			p = getDump();
+//			p = getDump();
 			if(p == null){
 				p =  new IndexPro();
 			}
@@ -78,12 +82,7 @@ public final class IndexPro implements java.io.Serializable{
 				if (startId < endId) {
 					retryTime = 0;
 				} else {
-					try {
-						wordPro.save();
-						wordPro.clear();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					save(wordPro);
 					++retryTime;
 					if (retryTime < 5) {
 						sleep();
@@ -94,23 +93,48 @@ public final class IndexPro implements java.io.Serializable{
 				while (startId < endId) {
 					long tempStep = endId - startId;
 					int step = tempStep < (long) nThreads ? (int) tempStep:nThreads;
+					//test;
+					//startId = 315;
 					for (int i = 0; i < step; ++startId,++i) {
 						System.out.println("---------------------id=" + startId+ "--------------------");
 						new PageProThread(startId, wordPro).run();//多线程
+						if(startId % 2000 == 0){
+							save(wordPro);
+						}
 					}
 				}
 			}
+			stop();
 			dump();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private void save(WordPro wordPro) throws Exception {
+		try {
+			System.out.println("------------------------------word save begin-------------------------------------");
+			wordPro.save();
+			PageMd5Pro.updateInstance();
+			wordPro.clear();
+			System.out.println("------------------------------word save end-------------------------------------");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public synchronized void stop(){
-		this.isStarted = false;
-		System.out.println("---------------------stopping--------------------");
-		sleep();
-		System.out.println("---------------------stopped--------------------");
+		try {
+			PrintWriter pw =new PrintWriter(new File("G:/search_f.txt"));
+			this.isStarted = false;
+			System.out.println("---------------------stopping--------------------");
+			sleep();
+			System.out.println("---------------------stopped--------------------");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private static void sleep(){
@@ -203,9 +227,11 @@ public final class IndexPro implements java.io.Serializable{
 				Map<String,List<Integer>> wordTitleProMap = new HashMap<>();
 				int i = 0;
 				for(String word : titleSegments){
-					List<Integer> wordTitlePosL = wordTitleProMap.getOrDefault(word, new ArrayList<>());
-					wordTitlePosL.add(i);
-					wordTitleProMap.put(word, wordTitlePosL);
+					if(word.length() <= WORD_MAX_SIZE){
+						List<Integer> wordTitlePosL = wordTitleProMap.getOrDefault(word, new ArrayList<>());
+						wordTitlePosL.add(i);
+						wordTitleProMap.put(word, wordTitlePosL);
+					}
 					++i;
 				}
 				for(Entry<String,List<Integer>> e :wordTitleProMap.entrySet()){
@@ -239,19 +265,21 @@ public final class IndexPro implements java.io.Serializable{
 					
 				    int j1 = 0;
 					for(String word : shSentence.getSegs()){
-						{
-							List<Integer> wordBodyIPosL = wordBodyIProMap.getOrDefault(word, new ArrayList<>());
-							wordBodyIPosL.add(i1);
-							wordBodyIProMap.put(word, wordBodyIPosL);
-						}
-						{
-							List<Integer> wordBodyJPosL = wordBodyJProMap.getOrDefault(word, new ArrayList<>());
-							wordBodyJPosL.add(j1);
-							wordBodyJProMap.put(word, wordBodyJPosL);
-						}
-						{
-							Integer count = wordBodyFrequecyMap.getOrDefault(word, 0);
-							wordBodyFrequecyMap.put(word, count+1);
+						if(word.length() <= WORD_MAX_SIZE){
+							{
+								List<Integer> wordBodyIPosL = wordBodyIProMap.getOrDefault(word, new ArrayList<>());
+								wordBodyIPosL.add(i1);
+								wordBodyIProMap.put(word, wordBodyIPosL);
+							}
+							{
+								List<Integer> wordBodyJPosL = wordBodyJProMap.getOrDefault(word, new ArrayList<>());
+								wordBodyJPosL.add(j1);
+								wordBodyJProMap.put(word, wordBodyJPosL);
+							}
+							{
+								Integer count = wordBodyFrequecyMap.getOrDefault(word, 0);
+								wordBodyFrequecyMap.put(word, count+1);
+							}
 						}
 						++j1;
 					}

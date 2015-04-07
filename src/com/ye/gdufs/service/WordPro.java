@@ -72,6 +72,7 @@ public class WordPro {
 	public void clear() {
 		wordFreqMap.clear();
 		wordPosMap.clear();
+		uuidWordProMap = null;
 	}
 	
 	private void initUuidWordProMap(){
@@ -114,10 +115,6 @@ public class WordPro {
 			}
 		});
 	}
-	/*private Map<String,Map<Long,WordFreq>> wordFreqMap = new HashMap<>();
-	private Map<String,Map<Long,WordPos>>  wordPosMap= new HashMap<>();
-	private Map<UUID,WordPro> uuidWordProMap;
-	*/
 	//需要合并，再计算
 	public synchronized void operation(Op op) throws Exception {
 		merge();

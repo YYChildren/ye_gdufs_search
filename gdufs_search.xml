@@ -17,8 +17,8 @@
 	
 	<data basepath="G:/gdufs_search2">
 	   <page dir="page" extend="pg"/>
-	   <wordurls dir="wordfreq" extend="wf"/>
-	   <wordurlpos dir="wordpos" extend="wp"/>
+	   <wordfreq dir="wordfreq" extend="wf"/>
+	   <wordpos dir="wordpos" extend="wp"/>
 	</data>
 	   
 	<!-- 分词、词性标注、实体标注、依存句法分析的模型路径 -->

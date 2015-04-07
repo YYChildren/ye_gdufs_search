@@ -99,6 +99,7 @@ public class WordDaoImpl implements WordDao{
 		.setString("word", w.getWord())
 		.setLong("urlCount", w.getUrlCount())
 		.setString("serName", w.getSerName()).executeUpdate();
+		
 	}
 	@Override
 	public void rrollback(){
