@@ -9,7 +9,7 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost/gdufs_search</property>
+        <property name="connection.url">jdbc:mysql://localhost/gdufs_search2</property>
         <property name="connection.username">children</property>
         <property name="connection.password">123success</property>
 
@@ -24,6 +24,9 @@
 
         <!-- Disable the second-level cache  -->
         <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
+        <!-- <property name="cache.use_second_level_cache">true</property>
+        <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+        <property name="cache.use_query_cache">true</property> -->
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">true</property>
@@ -34,8 +37,10 @@
         <mapping class="com.ye.gdufs.model.CrawlData" />
         <mapping class="com.ye.gdufs.model.Dump" />
         <mapping class="com.ye.gdufs.model.Page" />
-        <mapping class="com.ye.gdufs.model.WordUrls" />
-        <mapping class="com.ye.gdufs.model.WordUrlPos" />
+        <mapping class="com.ye.gdufs.model.PageMd5" />
+        <mapping class="com.ye.gdufs.model.Word" />
+<!--         <mapping class="com.ye.gdufs.model.WordUrls" /> -->
+<!--         <mapping class="com.ye.gdufs.model.WordUrlPos" /> -->
 
     </session-factory>
 

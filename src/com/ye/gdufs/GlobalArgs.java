@@ -88,11 +88,11 @@ public final class GlobalArgs {
 	public static String[] getPageInfo(){
 		return getDataInfo("page");
 	}
-	public static String[] getWordUrlsInfo(){
-		return getDataInfo("wordurls");
+	public static String[] getWordPosInfo() {
+		return getDataInfo("wordpos");
 	}
-	public static String[] getWordUrlPosInfo(){
-		return getDataInfo("wordurlpos");
+	public static String[] getWordFreqInfo(){
+		return getDataInfo("wordfreq");
 	}
 	private static String[] getDataInfo(String type){
 		Element data = doc.select("data[basepath]").first();

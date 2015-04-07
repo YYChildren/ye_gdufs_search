@@ -2,7 +2,7 @@ package com.ye.gdufs.model;
 
 import java.util.List;
 
-public final class WordUrlPosSer implements java.io.Serializable{
+public final class WordPos implements java.io.Serializable{
 	private static final long serialVersionUID = 4822587779643626762L;
 	private List<Integer> titleWordPos;
 	private List<Integer> bodyWordIPos;

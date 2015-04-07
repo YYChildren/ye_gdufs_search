@@ -20,7 +20,7 @@ import com.ye.gdufs.model.Dump;
 
 
 public class Misc {
-	private static SHFactory shf = SHFactory.getInstance();
+	private static SHFactory shf ;
 	
 	public static  void dumpObject(String key,Serializable o) throws Exception {
 		try {
@@ -76,6 +76,9 @@ public class Misc {
 		return MsgUtil.msgDigest(sb.toString());
 	}
 	public static SentenceHandler analyzeSentence(String sentence) throws Exception{
+		if(shf == null){
+			shf = SHFactory.getInstance();
+		}
 		return shf.buildHandler().analyze(sentence);
 	}
 }

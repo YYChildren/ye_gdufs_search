@@ -5,36 +5,26 @@ import javax.persistence.Id;
 
 @Entity
 public class Page {
-	private String urlMd5;
+	private long uid;//url的mpq
 	private String url;
-	private String contentMd5;//标题，部分内容的md5
 	private int titleFrequency;
 	private int bodyFrequency;
-	private String serName;
+	private String serName;//pid的16进制
 	
 	@Id
-	public String getUrlMd5() {
-		return urlMd5;
+	public long getUid() {
+		return uid;
 	}
-	
-	public void setUrlMd5(String urlMd5) {
-		this.urlMd5 = urlMd5;
+	public void setUid(long uid) {
+		this.uid = uid;
 	}
+
 
 	public String getUrl() {
 		return url;
 	}
-
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getContentMd5() {
-		return contentMd5;
-	}
-
-	public void setContentMd5(String contentMd5) {
-		this.contentMd5 = contentMd5;
 	}
 
 	public int getTitleFrequency() {

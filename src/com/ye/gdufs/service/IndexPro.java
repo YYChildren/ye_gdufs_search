@@ -3,11 +3,9 @@ package com.ye.gdufs.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -17,17 +15,16 @@ import org.jsoup.nodes.Document;
 import com.ye.gdufs.GlobalArgs;
 import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
-import com.ye.gdufs.dao.PageDaoImpl;
 import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
+import com.ye.gdufs.util.MPQ;
 import com.ye.gdufs.util.Misc;
-import com.ye.gdufs.util.MsgUtil;
 import com.ye.gdufs.util.Paragraph;
 import com.ye.gdufs.util.SentenceHandler;
 
 public final class IndexPro implements java.io.Serializable{
 	private static final long serialVersionUID = -7940609119323972989L;
-	private final static String key = "createindexpro";
+	private final static String key = "indexpro";
 	private static IndexPro indexPro = null;
 		
 	private long startId;
@@ -73,21 +70,17 @@ public final class IndexPro implements java.io.Serializable{
 			}
 		}
 		try {
-			WordUrlsPro wusPro = new WordUrlsPro();
+			WordPro wordPro = new WordPro();
 			int retryTime = 0;
 			int nThreads = GlobalArgs.getPageThread();
-			//			//test
-			//			startId = 67;
 			while (isStarted) {
 				long endId = CrawlDataDaoImpl.getMaxId() + 1;
-				//				//test
-				//				endId=68;
 				if (startId < endId) {
 					retryTime = 0;
 				} else {
 					try {
-						wusPro.save();
-						wusPro.clear();
+						wordPro.save();
+						wordPro.clear();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -103,7 +96,7 @@ public final class IndexPro implements java.io.Serializable{
 					int step = tempStep < (long) nThreads ? (int) tempStep:nThreads;
 					for (int i = 0; i < step; ++startId,++i) {
 						System.out.println("---------------------id=" + startId+ "--------------------");
-						new PageProThread(startId, wusPro).run();
+						new PageProThread(startId, wordPro).run();//多线程
 					}
 				}
 			}
@@ -143,15 +136,16 @@ public final class IndexPro implements java.io.Serializable{
 	}
 
 	class PageProThread implements Runnable{
+		MPQ mpq =MPQ.getInstance();
 		private long id;
-		WordUrlsPro wusPro;
-		
+		WordPro wordPro;
 		PagePro pageProLocal;
-		WordUrlPosPro wupProLocal;
-		WordUrlsPro wusProLocal;
-		public PageProThread(long id,WordUrlsPro wusPro) {
+		WordPro wordProLocal;
+		PageMd5Pro pmPro = PageMd5Pro.getInstance();;
+		String contentMd5;
+		public PageProThread(long id,WordPro wordPro) {
 			this.id = id;
-			this.wusPro = wusPro;
+			this.wordPro = wordPro;
 		}
 		@Override
 		public void run() {
@@ -179,22 +173,20 @@ public final class IndexPro implements java.io.Serializable{
 				if(para.isEmpty()){
 					return;
 				}
-				String contentMd5 = Misc.getContentMd5(html);
-				if(new PageDaoImpl().isExistContentMd5(contentMd5)){
+				contentMd5 = Misc.getContentMd5(html);
+				if(pmPro.contains(contentMd5)){
 					return;
 				}
-				
+				pmPro.psave(contentMd5);
 				
 				//-----------------create----------------------------//
 				create();
 				String url = cdd.getUrl();
-				String urlMd5 = MsgUtil.msgDigest(url);
-				pageProLocal.setUrlMd5(urlMd5);
+				long uid = mpq.hash(url);
+				pageProLocal.setUid(uid);
 				pageProLocal.setUrl(url);
-				pageProLocal.setContentMd5(contentMd5);
-				pageProLocal.setSerName(urlMd5);
 				
-				Set<String> wordAreadyPro = new HashSet<String>();
+				
 				//-------------------------------------------------------begin of title-----------------------------------------------------------//
 				System.out.println("-------------------------------------------------------------title begin-------------------------------------------------------------");
 				
@@ -211,25 +203,17 @@ public final class IndexPro implements java.io.Serializable{
 				Map<String,List<Integer>> wordTitleProMap = new HashMap<>();
 				int i = 0;
 				for(String word : titleSegments){
-					if(!wordTitleProMap.containsKey(word)){
-						List<Integer> wordTitlePosL = new ArrayList<>();
-						wordTitlePosL.add(i);
-						wordTitleProMap.put(word, wordTitlePosL);
-					}else{
-						wordTitleProMap.get(word).add(i);
-					}
-					if(!wordAreadyPro.contains(word)){
-						wusProLocal.putUrlMd5(word, urlMd5);
-						wordAreadyPro.add(word);
-					}
+					List<Integer> wordTitlePosL = wordTitleProMap.getOrDefault(word, new ArrayList<>());
+					wordTitlePosL.add(i);
+					wordTitleProMap.put(word, wordTitlePosL);
 					++i;
 				}
 				for(Entry<String,List<Integer>> e :wordTitleProMap.entrySet()){
 					String word = e.getKey();
-					List<Integer> titleWordPos = e.getValue();
-					int titleWordFrequecy = titleWordPos.size();
-					wupProLocal.putTitleWordPos(word, urlMd5, titleWordPos);
-					wupProLocal.putTitleWordFrequecy(word, urlMd5, titleWordFrequecy );
+					List<Integer> wordTitlePosL = e.getValue();
+					int titleWordFrequecy = wordTitlePosL.size();
+					wordProLocal.putTitleWordPos(word, uid, wordTitlePosL);
+					wordProLocal.putTitleWordFrequecy(word, uid, titleWordFrequecy );
 				}
 				wordTitleProMap = null;
 				System.out.println("-------------------------------------------------------------title end-------------------------------------------------------------\n");
@@ -255,27 +239,19 @@ public final class IndexPro implements java.io.Serializable{
 					
 				    int j1 = 0;
 					for(String word : shSentence.getSegs()){
-						if(!wordBodyIProMap.containsKey(word)){
-							List<Integer> wordBodyIPosL = new ArrayList<>();
-							wordBodyIPosL.add(i);
+						{
+							List<Integer> wordBodyIPosL = wordBodyIProMap.getOrDefault(word, new ArrayList<>());
+							wordBodyIPosL.add(i1);
 							wordBodyIProMap.put(word, wordBodyIPosL);
-						}else{
-							wordBodyIProMap.get(word).add(i1);
-						}
-						if(!wordBodyJProMap.containsKey(word)){
-							List<Integer> wordBodyJPosL = new ArrayList<>();
-							wordBodyJPosL.add(i);
-							wordBodyJProMap.put(word, wordBodyJPosL);
-						}else{
-							wordBodyJProMap.get(word).add(j1);
 						}
 						{
-							Integer count = wordBodyFrequecyMap.containsKey(word)?wordBodyFrequecyMap.get(word):0;
-							wordBodyFrequecyMap.put(word, count+1);
+							List<Integer> wordBodyJPosL = wordBodyJProMap.getOrDefault(word, new ArrayList<>());
+							wordBodyJPosL.add(j1);
+							wordBodyJProMap.put(word, wordBodyJPosL);
 						}
-						if(!wordAreadyPro.contains(word)){
-							wusProLocal.putUrlMd5(word, urlMd5);
-							wordAreadyPro.add(word);
+						{
+							Integer count = wordBodyFrequecyMap.getOrDefault(word, 0);
+							wordBodyFrequecyMap.put(word, count+1);
 						}
 						++j1;
 					}
@@ -289,37 +265,43 @@ public final class IndexPro implements java.io.Serializable{
 				for(Entry<String,Integer> bodyWordFrequecyEntry : wordBodyFrequecyMap.entrySet()){
 					String word = bodyWordFrequecyEntry.getKey();
 					Integer bodyWordFrequecy = bodyWordFrequecyEntry.getValue();
-					List<Integer> bodyWordIPos = wordBodyIProMap.get(word);
-					List<Integer> bodyWordJPos = wordBodyJProMap.get(word);
-					wupProLocal.putBodyWordFrequecy(word, urlMd5, bodyWordFrequecy);
-					wupProLocal.putBodyWordIPos(word, urlMd5, bodyWordIPos);
-					wupProLocal.putBodyWordJPos(word, urlMd5, bodyWordJPos);
+					List<Integer> bodyWordIPosL = wordBodyIProMap.get(word);
+					List<Integer> bodyWordJPosL = wordBodyJProMap.get(word);
+					wordProLocal.putBodyWordFrequecy(word, uid, bodyWordFrequecy);
+					wordProLocal.putBodyWordIPos(word, uid, bodyWordIPosL);
+					wordProLocal.putBodyWordJPos(word, uid, bodyWordJPosL);
 				}
-				body = null;
-				para = null;
-				bodySegments = null;
-				bodyPostags = null;
-				bodyNers = null;
-				wordBodyIProMap = null;
-				wordBodyJProMap = null;
-				wordBodyFrequecyMap = null;
+				{
+					body = null;
+					para = null;
+					bodySegments = null;
+					bodyPostags = null;
+					bodyNers = null;
+					wordBodyIProMap = null;
+					wordBodyJProMap = null;
+					wordBodyFrequecyMap = null;
+				}
 				System.out.println("-------------------------------------------------------------body end-------------------------------------------------------------\n");
 				//-------------------------------------------------------end of body-----------------------------------------------------------//
 			} catch (Exception e) {
+				if(contentMd5 !=null ){
+					pmPro.prollback(contentMd5);
+				}
 				clean();
 				e.printStackTrace();
 			}
 		}
 		private void clean(){
 			pageProLocal = null;
-			wupProLocal = null;
-			wusProLocal = null;
+			wordProLocal = null;
+			contentMd5 = null;
 		}
+		
 		private void create(){
 			pageProLocal = new PagePro();
-			wupProLocal = new WordUrlPosPro();
-			wusProLocal = new WordUrlsPro();
+			wordProLocal = new WordPro();
 		}
+		
 		private void save(){
 			UUID uuid = UUID.randomUUID();
 			try {
@@ -330,20 +312,14 @@ public final class IndexPro implements java.io.Serializable{
 					@Override
 					public Object execute(Session session) throws Exception {
 						pageProLocal.rsave(session);
-						wupProLocal.rsave(session);
-						wusPro.psave(uuid,wusProLocal);
+						wordPro.psave(uuid,wordProLocal);
 						return null;
 					}
 				};
 				HibernateUtil.execute(hs);
 			} catch (Exception e) {
 				pageProLocal.rrollback();
-				try {
-					wupProLocal.rrollback();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-				wusPro.prollback(uuid);
+				wordPro.prollback(uuid);
 				e.printStackTrace();
 			}
 		}

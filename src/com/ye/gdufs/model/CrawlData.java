@@ -10,7 +10,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name="crawldata_t")
 public final class CrawlData{
-	//url的md5
 	private long id;
 	private String url;
 	private byte[] content;
