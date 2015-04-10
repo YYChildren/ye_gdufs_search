@@ -1,9 +1,6 @@
 package com.ye.gdufs.service;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,16 +121,10 @@ public final class IndexPro implements java.io.Serializable{
 	}
 
 	public synchronized void stop(){
-		try {
-			PrintWriter pw =new PrintWriter(new File("G:/search_f.txt"));
-			this.isStarted = false;
-			System.out.println("---------------------stopping--------------------");
-			sleep();
-			System.out.println("---------------------stopped--------------------");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.isStarted = false;
+		System.out.println("---------------------stopping--------------------");
+		sleep();
+		System.out.println("---------------------stopped--------------------");
 		
 	}
 	

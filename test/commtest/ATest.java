@@ -3,6 +3,8 @@ package commtest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,6 +16,25 @@ import com.ye.gdufs.util.SHFactory;
 import com.ye.gdufs.util.SentenceHandler;
 
 public class ATest {
+	
+	@Test
+	public void testWeakHashMap(){
+		WeakHashMap<Integer,Integer> w = new WeakHashMap<Integer,Integer>();
+		int i = 1000;
+		while(i-->0){
+			w.put(i, i);
+		}
+		System.gc();
+		System.out.println(w.size());
+	}
+	
+	@Test
+	public void testArray(){
+		ArrayList<String> a = new ArrayList<String>();
+		a.add(null);
+		a.add(null);
+		System.out.println(a);
+	}
 	
 	@Test
 	public void testHex(){

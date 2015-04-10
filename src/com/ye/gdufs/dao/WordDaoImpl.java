@@ -1,6 +1,7 @@
 package com.ye.gdufs.dao;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
@@ -121,4 +122,19 @@ public class WordDaoImpl implements WordDao{
 		freqFile = new File(freqPath);
 		posFile = new File(posPath);
 	}
+	@Override
+	public void get(String word) throws Exception {
+		w = (Word) HibernateUtil.get(Word.class, word);
+		initUidFreq();
+		setPath();
+	}
+	@SuppressWarnings("unchecked")
+	public synchronized void initUidFreq() throws FileNotFoundException, ClassNotFoundException, IOException{
+		this.uidFreq = (Map<Long, WordFreq>) Misc.readObject(freqFile);
+	}
+	@SuppressWarnings("unchecked")
+	public synchronized void inituidPos() throws FileNotFoundException, ClassNotFoundException, IOException{
+		this.uidPos = (Map<Long, WordPos>) Misc.readObject(posFile);
+	}
+	
 }
