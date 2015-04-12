@@ -3,6 +3,8 @@ package commtest;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 
@@ -11,12 +13,35 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Entities;
 import org.junit.Test;
 
+import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.util.MPQ;
+import com.ye.gdufs.util.MsgUtil;
 import com.ye.gdufs.util.Paragraph;
 import com.ye.gdufs.util.SHFactory;
 import com.ye.gdufs.util.SentenceHandler;
 
 public class ATest {
-	
+	@Test 
+	public void testMd5() throws NoSuchAlgorithmException, UnsupportedEncodingException{
+		String str = "asdjkfgyiaubcv我是中国人kbxkifdghvkjsudf";
+		System.out.println(MsgUtil.msgDigest(str));
+		System.out.println(MsgUtil.msgDigest(str));
+		System.out.println(MPQ.getInstance().hash(str));
+		System.out.println(MPQ.getInstance().hash(str));
+		str = "asdjkfgyiaubcv我是中国人kbxkifdghvkjsud";
+		System.out.println(MsgUtil.msgDigest(str));
+		System.out.println(MsgUtil.msgDigest(str));
+		System.out.println(MPQ.getInstance().hash(str));
+		System.out.println(MPQ.getInstance().hash(str));
+	}
+	@Test
+	public void test_byte(){
+		byte b = (byte)0x0FFF;
+		
+		System.out.println(b);
+		System.out.println(b & 0xff);
+		System.out.println(b+1);
+	}
 	@Test
 	public void testWeakHashMap(){
 		WeakHashMap<Integer,Integer> w = new WeakHashMap<Integer,Integer>();

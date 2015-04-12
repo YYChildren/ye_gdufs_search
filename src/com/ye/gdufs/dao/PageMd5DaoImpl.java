@@ -5,12 +5,13 @@ import java.io.IOException;
 
 import org.hibernate.Session;
 
+import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.PageMd5;
+import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
 
 public class PageMd5DaoImpl implements PageMd5Dao {
 	private PageMd5 pm;
-	
 
 	public PageMd5DaoImpl() {
 		super();
@@ -22,6 +23,10 @@ public class PageMd5DaoImpl implements PageMd5Dao {
 	}
 	
 
+	public PageMd5DaoImpl(String contentMd5) {
+		this( new PageMd5(contentMd5));
+	}
+
 	public PageMd5 getPm() {
 		return pm;
 	}
@@ -32,7 +37,18 @@ public class PageMd5DaoImpl implements PageMd5Dao {
 
 	@Override
 	public void save() throws Exception {
-		HibernateUtil.save(pm);
+		HibernateSql hs = new HibernateSql(){
+			@Override
+			public Object execute(Session session) throws Exception {
+				rsave(session);
+				return null;
+			}};
+			try {
+				HibernateUtil.execute(hs);
+			} catch (Exception e) {
+				 rrollback();
+				 throw e;
+			}
 	}
 
 	@Override
@@ -43,5 +59,14 @@ public class PageMd5DaoImpl implements PageMd5Dao {
 
 	@Override
 	public void rrollback() {
+	}
+
+	public static PageMd5 get(String contentMd5) {
+		try {
+			return (PageMd5) HibernateUtil.get(PageMd5.class,contentMd5);
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+			return null;
+		}
 	}
 }

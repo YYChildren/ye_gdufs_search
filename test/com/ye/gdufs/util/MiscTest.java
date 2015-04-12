@@ -27,7 +27,6 @@ public class MiscTest {
 			Misc.writeObject(file , "11111askdfhlsdhfl");
 			Misc.writeObject(file , "22222askdfhlsdhfl");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -39,7 +38,6 @@ public class MiscTest {
 			System.out.println(Misc.readObject(file));
 			System.out.println(Misc.readObject(file));
 		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

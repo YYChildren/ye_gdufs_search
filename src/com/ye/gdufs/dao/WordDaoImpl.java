@@ -9,132 +9,175 @@ import java.util.Map;
 import org.hibernate.Session;
 
 import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Word;
-import com.ye.gdufs.model.WordFreq;
 import com.ye.gdufs.model.WordPos;
 import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
 import com.ye.gdufs.util.MPQ;
 import com.ye.gdufs.util.Misc;
 
-public class WordDaoImpl implements WordDao{
-	private Word w = new Word();
-	private Map<Long, WordFreq> oldUidFreq;
+public class WordDaoImpl implements WordDao {
 	private Map<Long, WordPos> oldUidPos;
-	private Map<Long, WordFreq> uidFreq;
+	private Map<Long, Integer> oldUidTitleFreq;
+	private Map<Long, Integer> oldUidBodyFreq;
+
+	private Word w = new Word();
 	private Map<Long, WordPos> uidPos;
+	private Map<Long, Integer> uidTitleFreq;
+	private Map<Long, Integer> uidBodyFreq;
 	private File freqFile;
 	private File posFile;
 	private static String[] freqInfo;
 	private static String[] posInfo;
-	static{
+	static {
 		freqInfo = GlobalArgs.getWordFreqInfo();
 		posInfo = GlobalArgs.getWordPosInfo();
 	}
-	
-	public WordDaoImpl(){}
-	public WordDaoImpl(String word, Map<Long, WordFreq> uidFreq,
-			Map<Long, WordPos> uidPos) {
-		this.uidFreq = uidFreq;
+
+	public WordDaoImpl() {
+	}
+
+	public WordDaoImpl(String word, Map<Long, WordPos> uidPos,
+			Map<Long, Integer> uidTitleFreq, Map<Long, Integer> uidBodyFreq) {
 		this.uidPos = uidPos;
-		//
 		this.w.setWord(word);
-		long urlCount = this.uidFreq.size();
-		this.w.setUrlCount(urlCount );
+		this.w.setUidTitleCount(uidTitleFreq.size());
+		this.w.setUidBodyCount(uidBodyFreq.size());
+		this.uidTitleFreq = uidTitleFreq;
+		this.uidBodyFreq = uidBodyFreq;
 		String serName = Long.toHexString(MPQ.getInstance().hash(word));
 		this.w.setSerName(serName);
 		setPath();
 	}
-	public Map<Long, WordFreq> getUidFreq() {
-		return uidFreq;
-	}
-	public void setUidFreq(Map<Long, WordFreq> uidFreq) {
-		this.uidFreq = uidFreq;
-	}
-	public Map<Long, WordPos> getUidPos() {
-		return uidPos;
-	}
-	public void setUidPos(Map<Long, WordPos> uidPos) {
-		this.uidPos = uidPos;
-	}
+
 	public Word getW() {
 		return w;
 	}
+
 	public void setW(Word w) {
 		this.w = w;
 	}
-	
+
+	public Map<Long, WordPos> getUidPos() {
+		return uidPos;
+	}
+
+	public void setUidPos(Map<Long, WordPos> uidPos) {
+		this.uidPos = uidPos;
+	}
+
+	public Map<Long, Integer> getUidTitleFreq() {
+		return uidTitleFreq;
+	}
+
+	public void setUidTitleFreq(Map<Long, Integer> uidTitleFreq) {
+		this.uidTitleFreq = uidTitleFreq;
+	}
+
+	public Map<Long, Integer> getUidBodyFreq() {
+		return uidBodyFreq;
+	}
+
+	public void setUidBodyFreq(Map<Long, Integer> uidBodyFreq) {
+		this.uidBodyFreq = uidBodyFreq;
+	}
+
 	@Override
 	public void save() throws Exception {
+		HibernateSql hs = session -> {
+			rsave(session);
+			return null;
+		};
 		try {
-			HibernateSql hs = session -> {
-				rsave(session);
-				return null;
-			};
 			HibernateUtil.execute(hs);
 		} catch (Exception e) {
 			rrollback();
 			throw e;
 		}
 	}
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public void rsave(Session session) throws IOException{
-		//---------------begin ser-----------------------------
+	public void rsave(Session session) throws IOException {
+		session.createSQLQuery(
+				"replace into word(word,uidtitlecount,uidbodycount,sername) values(:word,:uidtitlecount,:uidbodycount,:serName)")
+				.setString("word", w.getWord())
+				.setLong("uidtitlecount", w.getUidTitleCount())
+				.setLong("uidbodycount", w.getUidBodyCount())
+				.setString("serName", w.getSerName()).executeUpdate();
+		// ---------------begin ser-----------------------------
 		try {
-			this.oldUidFreq = (Map<Long, WordFreq>) Misc.readObject(freqFile);
 			this.oldUidPos = (Map<Long, WordPos>) Misc.readObject(posFile);
+			Object[] sers = Misc.readObjects(freqFile, 2);
+			this.oldUidTitleFreq = (Map<Long, Integer>) sers[0];
+			this.oldUidBodyFreq = (Map<Long, Integer>) sers[1];
 		} catch (ClassNotFoundException | IOException e) {
-			this.oldUidFreq = null;
 			this.oldUidPos = null;
+			this.oldUidTitleFreq = null;
+			this.oldUidBodyFreq = null;
 		}
-		if(oldUidFreq != null && oldUidPos != null){
-			uidFreq.putAll(oldUidFreq);
+		if (oldUidPos != null && this.oldUidTitleFreq != null
+				&& this.oldUidBodyFreq != null) {
 			uidPos.putAll(oldUidPos);
-			w.setUrlCount(uidFreq.size());
+			uidTitleFreq.putAll(oldUidTitleFreq);
+			uidBodyFreq.putAll(oldUidBodyFreq);
+			w.setUidTitleCount(uidTitleFreq.size());
+			w.setUidBodyCount(uidBodyFreq.size());
 		}
-		Misc.writeObject(freqFile, (Serializable) uidFreq);
+
 		Misc.writeObject(posFile, (Serializable) uidPos);
-		//---------------end ser-----------------------------
-		session.createSQLQuery("replace into word(word,urlcount,sername) values(:word,:urlCount,:serName)")
-		.setString("word", w.getWord())
-		.setLong("urlCount", w.getUrlCount())
-		.setString("serName", w.getSerName()).executeUpdate();
-		
+		Object[] sers = { uidTitleFreq, uidBodyFreq };
+		Misc.writeObjects(freqFile, sers, 2);
+		// ---------------end ser-----------------------------
 	}
+
 	@Override
-	public void rrollback(){
-		if(oldUidFreq != null && oldUidPos != null){
+	public void rrollback() {
+		if (oldUidPos != null && this.oldUidTitleFreq != null
+				&& this.oldUidBodyFreq != null) {
 			try {
-				Misc.writeObject(freqFile, (Serializable) oldUidFreq);
 				Misc.writeObject(posFile, (Serializable) oldUidPos);
+				Object[] oldSers = { oldUidTitleFreq, oldUidBodyFreq };
+				Misc.writeObjects(freqFile, oldSers, 2);
 			} catch (IOException e) {
-				e.printStackTrace();
-				this.oldUidFreq = null;
+				Logs.printStackTrace(e);
 				this.oldUidPos = null;
+				this.oldUidTitleFreq = null;
+				this.oldUidBodyFreq = null;
 			}
 		}
 	}
-	
+
 	private void setPath() {
-		String freqPath = freqInfo[0] + "/" + w.getSerName() + "." + freqInfo[1];
+		String freqPath = freqInfo[0] + "/" + w.getSerName() + "."
+				+ freqInfo[1];
 		String posPath = posInfo[0] + "/" + w.getSerName() + "." + posInfo[1];
 		freqFile = new File(freqPath);
 		posFile = new File(posPath);
 	}
+
 	@Override
 	public void get(String word) throws Exception {
 		w = (Word) HibernateUtil.get(Word.class, word);
-		initUidFreq();
 		setPath();
 	}
+
 	@SuppressWarnings("unchecked")
-	public synchronized void initUidFreq() throws FileNotFoundException, ClassNotFoundException, IOException{
-		this.uidFreq = (Map<Long, WordFreq>) Misc.readObject(freqFile);
+	public synchronized void loadUidFreq() throws FileNotFoundException,
+			ClassNotFoundException, IOException {
+		if (this.uidTitleFreq == null || this.uidBodyFreq == null) {
+			Object[] sers = Misc.readObjects(freqFile, 2);
+			this.uidTitleFreq = (Map<Long, Integer>) sers[0];
+			this.uidBodyFreq = (Map<Long, Integer>) sers[1];
+		}
 	}
+
 	@SuppressWarnings("unchecked")
-	public synchronized void inituidPos() throws FileNotFoundException, ClassNotFoundException, IOException{
-		this.uidPos = (Map<Long, WordPos>) Misc.readObject(posFile);
+	public synchronized void loadUidPos() throws FileNotFoundException,
+			ClassNotFoundException, IOException {
+		if (this.uidPos == null) {
+			this.uidPos = (Map<Long, WordPos>) Misc.readObject(posFile);
+		}
 	}
-	
 }

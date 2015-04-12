@@ -28,7 +28,8 @@ primary key (contentMd5)
 );
 create table Word (
 word char(64),
-urlCount bigint not null,
+uidTitleCount bigint not null,
+uidBodyCount bigint not null,
 serName char(16),
 primary key (word)
 );

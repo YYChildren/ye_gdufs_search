@@ -5,6 +5,8 @@
  */
 package com.ye.gdufs.util;
 
+import com.ye.gdufs.GlobalArgs;
+
 import edu.hit.ir.ltp4j.NER;
 import edu.hit.ir.ltp4j.Postagger;
 import edu.hit.ir.ltp4j.Segmentor;
@@ -35,9 +37,9 @@ public final class SHFactory {
 
 	private synchronized static void syncInit() {
 		if (shf == null) {
-			cwsModel = "G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/cws.model";
-			posModel = "G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/pos.model";
-			nerModel = "G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/ner.model";
+			cwsModel = GlobalArgs.getCwsModelPath();
+			posModel = GlobalArgs.getPosModelPath();
+			nerModel = GlobalArgs.getNerModelPath();
 			if (isLoaded) {
 				return;
 			}

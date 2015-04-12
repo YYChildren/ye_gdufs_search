@@ -7,6 +7,9 @@ public final class WordPos implements java.io.Serializable{
 	private List<Integer> titleWordPos;
 	private List<Integer> bodyWordIPos;
 	private List<Integer> bodyWordJPos;
+	public WordPos() {
+		super();
+	}
 	public List<Integer> getTitleWordPos() {
 		return titleWordPos;
 	}

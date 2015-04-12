@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <search>
     <!-- 每次重新开始 -->
-<!--     <update>false</update> -->
 	<seeds update="false" depth="10">
 	   <value>http://www.gdufs.edu.cn/</value>
-<!--        <value>http://www.hao123.com/</value> -->
-<!-- 	   <value>http://www.mxfy.com/</value> -->
 	</seeds>
 	<urlfinishupdate>true</urlfinishupdate>
 	<crawlthread update="true">
@@ -32,5 +29,8 @@
 	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/ner.model</value>
 	</model>
 	
+	<logs base="D:/Administrator/eclipse_workspace/ye_gdufs_search/logs" extend="log">
+	   <error>error</error>
+	</logs>
 <!-- 	<timeout>5000</timeout> -->
 </search>

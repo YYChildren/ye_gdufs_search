@@ -10,19 +10,20 @@ import org.hibernate.Session;
 
 import com.ye.gdufs.dao.WordDao;
 import com.ye.gdufs.dao.WordDaoImpl;
-import com.ye.gdufs.model.WordFreq;
 import com.ye.gdufs.model.WordPos;
 
 public class WordPro {
 	//word -> uid -> .....
-	private Map<String,Map<Long,WordFreq>> wordFreqMap = new HashMap<>();
 	private Map<String,Map<Long,WordPos>>  wordPosMap= new HashMap<>();
+	private Map<String,Map<Long,Integer>> wordTitleFreqMap = new HashMap<>();
+	private Map<String,Map<Long,Integer>> wordBodyFreqMap = new HashMap<>();
 	private Map<UUID,WordPro> uuidWordProMap;
 	
-	
-
-	public Map<String, Map<Long, WordFreq>> getWordFreqMap() {
-		return wordFreqMap;
+	public Map<String, Map<Long, Integer>> getWordTitleFreqMap() {
+		return wordTitleFreqMap;
+	}
+	public Map<String, Map<Long, Integer>> getWordBodyFreqMap() {
+		return wordBodyFreqMap;
 	}
 	public Map<String, Map<Long, WordPos>> getWordPosMap() {
 		return wordPosMap;
@@ -54,24 +55,21 @@ public class WordPro {
 	}
 	public void putTitleWordFrequecy(String word, long uid,
 			int titleWordFrequecy) {
-		Map<Long, WordFreq> uidWFreqMap = wordFreqMap.getOrDefault(word, new HashMap<>());
-		WordFreq wFreq =uidWFreqMap.getOrDefault(uid, new WordFreq());
-		wFreq.setTitleWordFrequecy(titleWordFrequecy);
-		uidWFreqMap.put(uid, wFreq);
-		wordFreqMap.put(word, uidWFreqMap);
+		Map<Long, Integer> uidWTFreqMap = wordTitleFreqMap.getOrDefault(word, new HashMap<>());
+		uidWTFreqMap.put(uid, titleWordFrequecy);
+		wordTitleFreqMap.put(word, uidWTFreqMap);
 	}
 	public void putBodyWordFrequecy(String word, long uid,
 			Integer bodyWordFrequecy) {
-		Map<Long, WordFreq> uidWFreqMap = wordFreqMap.getOrDefault(word, new HashMap<>());
-		WordFreq wFreq =uidWFreqMap.getOrDefault(uid, new WordFreq());
-		wFreq.setBodyWordFrequecy(bodyWordFrequecy);
-		uidWFreqMap.put(uid, wFreq);
-		wordFreqMap.put(word, uidWFreqMap);
+		Map<Long, Integer> uidWBFreqMap = wordBodyFreqMap.getOrDefault(word, new HashMap<>());
+		uidWBFreqMap.put(uid, bodyWordFrequecy);
+		wordBodyFreqMap.put(word, uidWBFreqMap);
 	}
 
 	public void clear() {
-		wordFreqMap.clear();
 		wordPosMap.clear();
+		wordTitleFreqMap.clear();
+		wordBodyFreqMap.clear();
 		uuidWordProMap = null;
 	}
 	
@@ -118,11 +116,12 @@ public class WordPro {
 	//需要合并，再计算
 	public synchronized void operation(Op op) throws Exception {
 		merge();
-		for(Entry<String, Map<Long, WordFreq>> e : wordFreqMap.entrySet()){
+		for(Entry<String, Map<Long, WordPos>> e : wordPosMap.entrySet()){
 			String word = e.getKey();
-			Map<Long, WordFreq> uidFreq = e.getValue();
-			Map<Long, WordPos> uidPos = wordPosMap.get(word);
-			WordDao wupd = new WordDaoImpl(word,uidFreq,uidPos);
+			Map<Long, WordPos> uidPos = e.getValue();
+			Map<Long,Integer> uidTitleFreq = wordTitleFreqMap.getOrDefault(word, new HashMap<>());
+			Map<Long, Integer> uidBodyFreq = wordBodyFreqMap.getOrDefault(word, new HashMap<>());
+			WordDao wupd = new WordDaoImpl(word, uidPos,uidTitleFreq,uidBodyFreq);
 			op.operation(wupd);
 		}
 	}
@@ -137,26 +136,27 @@ public class WordPro {
 		uuidWordProMap = null;
 	}
 	private void merge(WordPro wordPro){
-		Map<String, Map<Long, WordFreq>> wordUidFreqMap = wordPro.getWordFreqMap();
 		Map<String,Map<Long, WordPos>> wordUidPosMap = wordPro.getWordPosMap();
-		for(Entry<String, Map<Long, WordFreq>> e : wordUidFreqMap.entrySet()){
+		Map<String, Map<Long, Integer>> wordUidTitleFreqMap = wordPro.getWordTitleFreqMap();
+		Map<String, Map<Long, Integer>> wordUidBodyFreqMap = wordPro.getWordBodyFreqMap();
+		for(Entry<String, Map<Long, WordPos>> e :  wordUidPosMap.entrySet()){
 			String word = e.getKey();
-			Map<Long, WordFreq> uidFreqMap = e.getValue();
-			Map<Long, WordPos> uidPosMap = wordUidPosMap.get(word);
-			putAllUrlAndMd5(word, uidFreqMap,uidPosMap);
+			Map<Long, WordPos> uidPosMap = e.getValue();
+			Map<Long, Integer> uidTitleFreqMap = wordUidTitleFreqMap.getOrDefault(word, new HashMap<>());
+			Map<Long, Integer> uidBodyFreqMap = wordUidBodyFreqMap.getOrDefault(word, new HashMap<>());
+			putAll(word,uidPosMap,uidTitleFreqMap,uidBodyFreqMap);
 		}
 	}
-	private void putAllUrlAndMd5(String word,Map<Long, WordFreq> uidFreqMap,Map<Long, WordPos> uidPosMap) {
-		{
-			Map<Long, WordFreq> uidWFreqMap = wordFreqMap.getOrDefault(word, new HashMap<>());
-			uidWFreqMap.putAll(uidFreqMap);
-			wordFreqMap.put(word, uidWFreqMap);
-		}
-		{
-			Map<Long, WordPos> uidWPosMap = wordPosMap.getOrDefault(word, new HashMap<>());
-			uidWPosMap.putAll(uidPosMap);
-			wordPosMap.put(word, uidWPosMap);
-		}
+	private void putAll(String word,Map<Long, WordPos> uidPosMap,Map<Long, Integer> uidTitleFreqMap,Map<Long, Integer> uidBodyFreqMap) {
+		Map<Long, WordPos> wordUidPosMap = wordPosMap.getOrDefault(word, new HashMap<>());
+		Map<Long, Integer> wordUidTitleFreqMap = wordTitleFreqMap.getOrDefault(word, new HashMap<>());
+		Map<Long, Integer> wordUidBodyFreqMap = wordBodyFreqMap.getOrDefault(word, new HashMap<>());
+		wordUidPosMap.putAll(uidPosMap);
+		wordUidTitleFreqMap.putAll(uidTitleFreqMap);
+		wordUidBodyFreqMap.putAll(uidBodyFreqMap);
+		wordPosMap.put(word, wordUidPosMap);
+		wordTitleFreqMap.put(word, wordUidTitleFreqMap);
+		wordBodyFreqMap.put(word, wordUidBodyFreqMap);
 	}
 	interface Op{
 		void operation(WordDao wupd)  throws Exception;

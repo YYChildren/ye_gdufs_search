@@ -20,6 +20,7 @@ import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
 import com.ye.gdufs.dao.DumpDao;
 import com.ye.gdufs.dao.DumpDaoImpl;
+import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Dump;
 import com.ye.gdufs.util.MsgUtil;
 
@@ -172,7 +173,7 @@ public class CrawlDataPro implements java.io.Serializable {
 		try {
 			Thread.sleep(CrawlDataPro.defaultTimeout);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 		}
 	}
 
@@ -206,7 +207,7 @@ public class CrawlDataPro implements java.io.Serializable {
 			CrawlDataPro obj = (CrawlDataPro) MsgUtil.bytes2Object(b);
 			return obj;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 			return null;
 		}
 	}
@@ -217,7 +218,7 @@ public class CrawlDataPro implements java.io.Serializable {
 			DumpDao dumpDao = new DumpDaoImpl(key, b);
 			dumpDao.save();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 		}
 	}
 }
@@ -262,8 +263,7 @@ class CrawlRun implements Runnable {
 			}
 			urlsReady.addAll(urls);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 		}
 	}
 }

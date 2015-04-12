@@ -28,7 +28,6 @@ public class TestSentenceHandler {
 			System.out.println(sh.getTags());
 			System.out.println(sh.getNers());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         System.out.println(System.currentTimeMillis() - t1);

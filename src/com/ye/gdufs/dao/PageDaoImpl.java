@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.hibernate.Session;
 
 import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Page;
 import com.ye.gdufs.model.PageSer;
 import com.ye.gdufs.util.HibernateSql;
@@ -47,6 +48,13 @@ public class PageDaoImpl implements PageDao {
 	
 	@Override
 	public void rsave(Session session) throws FileNotFoundException, IOException{
+		session.createSQLQuery("replace into page(uid,url,titlefrequency,bodyfrequency,sername)"
+				+ " values(:uid,:url,:titlefrequency,:bodyfrequency,:sername)")
+				.setLong("uid", page.getUid())
+				.setString("url", page.getUrl())
+				.setInteger("titlefrequency", page.getTitleFrequency())
+				.setInteger("bodyfrequency", page.getBodyFrequency())
+				.setString("sername", page.getSerName()).executeUpdate();
 		//-----------------begin ser------------------------
 		try {
 			this.oldPageSer = (PageSer) Misc.readObject(pageFile);
@@ -55,13 +63,6 @@ public class PageDaoImpl implements PageDao {
 		}
 		Misc.writeObject(pageFile, pageSer);
 		//-----------------end ser------------------------
-		session.createSQLQuery("replace into page(uid,url,titlefrequency,bodyfrequency,sername)"
-				+ " values(:uid,:url,:titlefrequency,:bodyfrequency,:sername)")
-				.setLong("uid", page.getUid())
-				.setString("url", page.getUrl())
-				.setInteger("titlefrequency", page.getTitleFrequency())
-				.setInteger("bodyfrequency", page.getBodyFrequency())
-				.setString("sername", page.getSerName()).executeUpdate();
 	}
 	@Override
 	public void rrollback(){
@@ -69,8 +70,7 @@ public class PageDaoImpl implements PageDao {
 			try {
 				Misc.writeObject(pageFile, oldPageSer);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logs.printStackTrace(e);
 			}
 		}
 	}
@@ -82,7 +82,12 @@ public class PageDaoImpl implements PageDao {
 				return null;
 			}
 		};
-		HibernateUtil.execute(hs);
+		try {
+			HibernateUtil.execute(hs);
+		} catch (Exception e) {
+			 rrollback();
+			 throw e;
+		}
 	}
 	@Override
 	public boolean isExistContentMd5(String contentMd5) throws Exception {

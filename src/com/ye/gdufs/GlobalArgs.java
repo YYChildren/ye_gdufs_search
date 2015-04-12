@@ -8,14 +8,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.ye.gdufs.log.Logs;
+
 public final class GlobalArgs {
 	private static Document doc;
 	static {
 		try {
 			update("gdufs_search.xml", "UTF-8");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 		}
 	}
 
@@ -29,9 +30,6 @@ public final class GlobalArgs {
 		return doc;
 	}
 
-	// public static boolean isUpdate(){
-	// return Boolean.parseBoolean(doc.select("update").first().text().trim());
-	// }
 	public static boolean isSeedsUpdate() {
 		return !doc.select("seeds[update=true]").isEmpty();
 	}
@@ -101,6 +99,14 @@ public final class GlobalArgs {
 		String path = basePath + "/" + subData.attr("dir");
 		String extend = subData.attr("extend");
 		String[] result = {path,extend};
+		return result;
+	}
+	public static String[] getErrorLogsinfo(){
+		Element logs = doc.select("logs[base]").first();
+		String basePath = logs.attr("base");
+		String extend = logs.attr("extend");
+		String errorName = logs.getElementsByTag("error").first().text();
+		String[] result =  {basePath,errorName,extend};
 		return result;
 	}
 }

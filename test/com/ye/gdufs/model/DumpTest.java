@@ -19,7 +19,6 @@ public class DumpTest {
     	try {
 			new ObjectOutputStream( b ).writeObject(a);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	byte[] objByte = b.toByteArray();

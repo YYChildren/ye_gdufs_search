@@ -7,6 +7,10 @@ import javax.persistence.Id;
 public final class Dump {
 	private String keyStr;
 	private byte[] objByte;
+	
+	public Dump() {
+		super();
+	}
 	@Id
 	public String getKeyStr() {
 		return keyStr;

@@ -11,6 +11,9 @@ public final class PageSer implements java.io.Serializable{
 	private List<List<String>> bodySegments;//分词分段，List<List<String>>的二进制
 	private List<List<String>> bodyPostags;//词性标注，List<List<String>>的二进制
 	private List<List<String>> bodyNers;//实体标注
+	public PageSer() {
+		super();
+	}
 	public List<String> getTitleSegments() {
 		return titleSegments;
 	}

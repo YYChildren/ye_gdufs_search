@@ -12,11 +12,11 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class MsgUtil {
-    public static final String defaultCharset = "utf-8";//"ISO-8859-1"
-    public static final String defaultDigest = "md5";//"ISO-8859-1"
+    public static final String CHARSET = "utf-8";//"ISO-8859-1"
+    public static final String DIGEST = "md5";//"ISO-8859-1"
     
     public static byte[] compress(String str) throws IOException{
-        return compress(str,defaultCharset);
+        return compress(str,CHARSET);
     }
     public static byte[] compress(String str,String charset) throws IOException{
     	byte[] bytes = str.getBytes(charset);
@@ -33,7 +33,7 @@ public class MsgUtil {
     }
 
     public static String uncompress(byte[] bytes) throws IOException {
-    	return uncompress(bytes,defaultCharset);
+    	return uncompress(bytes,CHARSET);
     }
     public static String uncompress(byte[] bytes, String charset) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -65,20 +65,20 @@ public class MsgUtil {
     }
 	
 	public static String msgDigest(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		return msgDigest(str,defaultDigest);
+		return msgDigest(str,DIGEST);
 	}
 	public static String msgDigest(String str,String digest) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		return msgDigest(str,digest,defaultCharset);
+		return msgDigest(str,digest,CHARSET);
 	}
 	public static String msgDigest(String str,String digest,String charset) throws NoSuchAlgorithmException, UnsupportedEncodingException{
         byte[] bytes = str.getBytes(charset);
         return bytesDigest(bytes,digest,charset);
 	}
 	public static String bytesDigest(byte[] bytes) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		return bytesDigest(bytes,defaultDigest);
+		return bytesDigest(bytes,DIGEST);
 	}
 	public static String bytesDigest(byte[] bytes,String digest) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		return bytesDigest(bytes,digest,defaultCharset);
+		return bytesDigest(bytes,digest,CHARSET);
 	}
 	public static String bytesDigest(byte[] bytes,String digest,String charset) throws NoSuchAlgorithmException, UnsupportedEncodingException{
 		MessageDigest m = MessageDigest.getInstance(digest);  

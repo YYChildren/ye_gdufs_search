@@ -13,6 +13,9 @@ public final class CrawlData{
 	private long id;
 	private String url;
 	private byte[] content;
+	public CrawlData() {
+		super();
+	}
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	public long getId() {

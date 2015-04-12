@@ -10,7 +10,7 @@ public class Page {
 	private int titleFrequency;
 	private int bodyFrequency;
 	private String serName;//pid的16进制
-	
+	public Page(){}
 	@Id
 	public long getUid() {
 		return uid;

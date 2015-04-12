@@ -8,6 +8,8 @@ import java.util.WeakHashMap;
 import org.hibernate.Session;
 
 import com.ye.gdufs.dao.WordDaoImpl;
+import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.model.Word;
 import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
 import com.ye.gdufs.util.SHFactory;
@@ -25,7 +27,7 @@ public class ResultCrt {
 		try {
 			urlCount = (long) HibernateUtil.execute(hs);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 		}
 	}
 	private String reqStr;
@@ -60,7 +62,7 @@ public class ResultCrt {
 			ArrayList<WordDaoImpl> wdiArr = new ArrayList<WordDaoImpl>();
 			SentenceHandler sh = shf.buildHandler().analyze(reqStr);
 			for(String word : sh.getSegs()){
-				if(word.length() > 64){
+				if(word.length() > Word.WORD_MAX_SIZE){
 					continue;
 				}
 				WordDaoImpl wdi = null;
@@ -71,9 +73,8 @@ public class ResultCrt {
 				wdi.get(word);
 				wdiArr.add(wdi);
 			}
-//			for(wdiArr)
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logs.printStackTrace(e);
 			return null;
 		}
 		return this;
