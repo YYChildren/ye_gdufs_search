@@ -17,9 +17,11 @@ import com.ye.gdufs.util.SentenceHandler;
 
 public class ResultCrt {
 	static long urlCount;
-	{
+	static{
+		update();
+	}
+	public static void update(){
 		HibernateSql hs = new HibernateSql(){
-
 			@Override
 			public Object execute(Session session) throws Exception {
 				return session.createQuery("select count(p.uid) from Page p").uniqueResult();
@@ -29,9 +31,10 @@ public class ResultCrt {
 		} catch (Exception e) {
 			Logs.printStackTrace(e);
 		}
+		System.gc();//垃圾回收，清理WeakHashMap缓存。
 	}
 	private String reqStr;
-	SHFactory shf = SHFactory.getInstance();
+	private SHFactory shf = SHFactory.getInstance();
 	private List<SimpleEntry<String, SimpleEntry<String, String>>> urlTitleContents;
 	private WeakHashMap<String,WordDaoImpl> wordWDI = new WeakHashMap<>();;
 
@@ -50,6 +53,7 @@ public class ResultCrt {
 
 	public ResultCrt setReqStr(String reqStr) {
 		this.reqStr = reqStr;
+		crtResult();
 		return this;
 	}
 

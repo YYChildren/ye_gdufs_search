@@ -87,7 +87,7 @@ public final class IndexPro implements java.io.Serializable{
 					if (retryTime < 5) {
 						sleep();
 					} else {
-						stop();
+						break;
 					}
 				}
 				while (startId < endId) {
@@ -98,7 +98,7 @@ public final class IndexPro implements java.io.Serializable{
 					for (int i = 0; i < step; ++startId,++i) {
 						System.out.println("---------------------id=" + startId+ "--------------------");
 						new PageProThread(startId, wordPro).run();//多线程
-						if(startId % 20000 == 0){
+						if(startId % 1000 == 0){
 							save(wordPro);
 						}
 					}
@@ -124,10 +124,11 @@ public final class IndexPro implements java.io.Serializable{
 
 	public synchronized void stop(){
 		this.isStarted = false;
-		System.out.println("---------------------stopping--------------------");
+		System.out.println("---------------------Index Create stopping--------------------");
+		Logs.info_msg("---------------------Index Create stopping--------------------");
 		sleep();
-		System.out.println("---------------------stopped--------------------");
-		
+		System.out.println("---------------------Index Create stopped--------------------");
+		Logs.info_msg("---------------------Index Create stopped--------------------");
 	}
 	
 	private static void sleep(){
@@ -139,10 +140,14 @@ public final class IndexPro implements java.io.Serializable{
 	}
 	
 	private synchronized void dump() throws Exception{
+		System.out.println("---------------------dump stopping--------------------");
+		Logs.info_msg("---------------------dump stopping--------------------");
 		Boolean temp = this.isStarted;
 		this.isStarted = false;
 		dump(this);
 		this.isStarted = temp;
+		System.out.println("---------------------dump stopped--------------------");
+		Logs.info_msg("---------------------dump stopped--------------------");
 	}
 	
 	private static void dump(java.io.Serializable o) throws Exception {

@@ -9,7 +9,7 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost/gdufs_search2</property>
+        <property name="connection.url">jdbc:mysql://localhost/gdufs_search</property>
         <property name="connection.username">children</property>
         <property name="connection.password">123success</property>
 
@@ -23,10 +23,11 @@
         <property name="current_session_context_class">thread</property>
 
         <!-- Disable the second-level cache  -->
-        <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property>
-        <!-- <property name="cache.use_second_level_cache">true</property>
-        <property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
-        <property name="cache.use_query_cache">true</property> -->
+        <!-- <property name="cache.provider_class">org.hibernate.cache.internal.NoCacheProvider</property> -->
+        <property name="cache.use_query_cache">true</property>
+        <property name="cache.use_second_level_cache">true</property>
+        <property name="cache.use_structured_entries">true</property>
+        <property name="cache.region.factory_class">org.hibernate.cache.EhCacheRegionFactory</property>
 
         <!-- Echo all executed SQL to stdout -->
         <property name="show_sql">false</property>
@@ -39,9 +40,9 @@
         <mapping class="com.ye.gdufs.model.Page" />
         <mapping class="com.ye.gdufs.model.PageMd5" />
         <mapping class="com.ye.gdufs.model.Word" />
-<!--         <mapping class="com.ye.gdufs.model.WordUrls" /> -->
-<!--         <mapping class="com.ye.gdufs.model.WordUrlPos" /> -->
-
+        <class-cache class="com.ye.gdufs.model.CrawlData" usage="read-only"/>
+        <class-cache class="com.ye.gdufs.model.Page" usage="read-only"/>
+        <class-cache class="com.ye.gdufs.model.PageMd5" usage="read-only"/>
+        <class-cache class="com.ye.gdufs.model.Word" usage="read-write"/>
     </session-factory>
-
 </hibernate-configuration>

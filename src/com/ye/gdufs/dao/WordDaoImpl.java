@@ -161,10 +161,12 @@ public class WordDaoImpl implements WordDao {
 	public void get(String word) throws Exception {
 		w = (Word) HibernateUtil.get(Word.class, word);
 		setPath();
+		loadUidPos();
+		loadUidFreq();
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized void loadUidFreq() throws FileNotFoundException,
+	private synchronized void loadUidFreq() throws FileNotFoundException,
 			ClassNotFoundException, IOException {
 		if (this.uidTitleFreq == null || this.uidBodyFreq == null) {
 			Object[] sers = Misc.readObjects(freqFile, 2);
@@ -174,7 +176,7 @@ public class WordDaoImpl implements WordDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized void loadUidPos() throws FileNotFoundException,
+	private synchronized void loadUidPos() throws FileNotFoundException,
 			ClassNotFoundException, IOException {
 		if (this.uidPos == null) {
 			this.uidPos = (Map<Long, WordPos>) Misc.readObject(posFile);

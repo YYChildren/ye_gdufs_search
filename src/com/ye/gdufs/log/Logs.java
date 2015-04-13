@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 
 import com.ye.gdufs.GlobalArgs;
 
+import java.time.LocalDateTime;
+
 public class Logs {
 	private static PrintWriter log_writer; 
 	static{
@@ -21,6 +23,9 @@ public class Logs {
 	}
 	public synchronized static void printStackTrace(Exception e){
 		try {
+			log_writer.print("--------------------------");
+			printNow();
+			log_writer.println(" Exception--------------------------");
 			e.printStackTrace(log_writer);
 			log_writer.flush();
 		} catch (Exception e1) {
@@ -30,10 +35,29 @@ public class Logs {
 	}
 	public synchronized static void error_msg(String format,Object... args){
 		try {
+			log_writer.print("--------------------------");
+			printNow();
+			log_writer.println(" error--------------------------");
 			log_writer.printf(format, args);
+			log_writer.println();
 			log_writer.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public synchronized static void info_msg(String format,Object... args){
+		try {
+			log_writer.print("--------------------------");
+			printNow();
+			log_writer.println(" info--------------------------");
+			log_writer.printf(format, args);
+			log_writer.println();
+			log_writer.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	private static void printNow(){
+		log_writer.print(LocalDateTime.now());
 	}
 }

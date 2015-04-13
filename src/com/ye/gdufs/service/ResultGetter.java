@@ -3,10 +3,10 @@ package com.ye.gdufs.service;
 import java.util.WeakHashMap;
 
 public class ResultGetter {
-	private static ResultGetter rgt;
+	private static ResultGetter rgt = ResultGetterIn.rg;
 	private WeakHashMap<String,ResultCrt> reqRC;
 	public ResultGetter getInstance(){
-		return ResultGetterIn.rg;
+		return rgt;
 	}
 	private ResultGetter(){
 		reqRC = new WeakHashMap<String, ResultCrt>();

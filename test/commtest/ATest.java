@@ -1,19 +1,19 @@
 package commtest;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Entities;
 import org.junit.Test;
 
-import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.util.MPQ;
 import com.ye.gdufs.util.MsgUtil;
 import com.ye.gdufs.util.Paragraph;
@@ -21,14 +21,42 @@ import com.ye.gdufs.util.SHFactory;
 import com.ye.gdufs.util.SentenceHandler;
 
 public class ATest {
+	@Test
+	public void testDate(){
+		System.out.println(LocalDateTime.now());
+	}
+	@Test
+	public void testHashMap(){
+		HashMap<Integer,Integer> kv = new HashMap<>();
+		kv.put(1, 1);
+		kv.put(2, 2);
+		kv.put(3, 3);
+		kv.put(4, 4);
+		kv.put(5, 5);
+		kv.put(6, 6);
+		kv.put(7, 7);
+		kv.put(8, 8);
+		kv.put(9, 9);
+		ArrayList<Integer> vvL = new ArrayList<>();
+		BiConsumer<Integer, Integer> action = new BiConsumer<Integer, Integer>(){
+			@Override
+			public void accept(Integer t, Integer u) {
+				vvL.add(u*t);
+			}  
+		};
+		System.out.println(vvL);
+		kv.forEach(action );
+		System.out.println(vvL);
+		vvL.forEach(v -> System.out.println(v));
+	}
 	@Test 
 	public void testMd5() throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		String str = "asdjkfgyiaubcv我是中国人kbxkifdghvkjsudf";
+		String str = "asdjkfgyiabcv我是中国kbxkifdghvkjsudf";
 		System.out.println(MsgUtil.msgDigest(str));
 		System.out.println(MsgUtil.msgDigest(str));
 		System.out.println(MPQ.getInstance().hash(str));
 		System.out.println(MPQ.getInstance().hash(str));
-		str = "asdjkfgyiaubcv我是中国人kbxkifdghvkjsud";
+		str = "sdjkfgyiaubcv我是中国人kbxkifdghvkjsudhgdyt";
 		System.out.println(MsgUtil.msgDigest(str));
 		System.out.println(MsgUtil.msgDigest(str));
 		System.out.println(MPQ.getInstance().hash(str));

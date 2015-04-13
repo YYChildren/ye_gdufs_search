@@ -1,6 +1,5 @@
 package com.ye.gdufs.service;
 
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 

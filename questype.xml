@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<question>
+    <common id="common">什么 哪 哪个 哪些</common>
+    <queslist>
+        <!--带下划线表示搜索时忽略置空-->
+        <humon id="humon">
+            <type>person</type>
+            <quesname>谁</quesname>
+            <commonstr>人 名字</commonstr>
+        </humon>
+        <time id="time">
+            <type>time</type>
+            <quesname>何时</quesname>
+            <commonstr>时间 时候 年 月 日</commonstr>
+        </time>
+        <number id="number">
+            <type>number</type>
+            <quesname>多少 多大 多高 几</quesname>
+            <commonstr></commonstr>
+        </number>
+        <defination id="defination">
+            <type>definition</type>
+            <quesname>什么</quesname>
+            <commonstr></commonstr>
+        </defination>
+        <reason id="reason">
+            <type>reason</type>
+            <quesname>为什么 为何</quesname>
+            <commonstr>原因</commonstr>
+        </reason>
+        <location id="location">
+            <type>location</type>
+            <quesname>何地 何处 哪 哪里 哪儿</quesname>
+            <commonstr>地点 地方 国家 省份 城市 城镇</commonstr>
+        </location>
+    </queslist>
+</question>
