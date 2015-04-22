@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.hibernate.Session;
 
-import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Word;
 import com.ye.gdufs.model.WordPos;
@@ -60,6 +60,11 @@ public class WordDaoImpl implements WordDao {
 	}
 
 	public Map<Long, WordPos> getUidPos() {
+		try {
+			loadUidPos();
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+		}
 		return uidPos;
 	}
 
@@ -68,6 +73,11 @@ public class WordDaoImpl implements WordDao {
 	}
 
 	public Map<Long, Integer> getUidTitleFreq() {
+		try {
+			loadUidFreq();
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+		}
 		return uidTitleFreq;
 	}
 
@@ -76,6 +86,11 @@ public class WordDaoImpl implements WordDao {
 	}
 
 	public Map<Long, Integer> getUidBodyFreq() {
+		try {
+			loadUidFreq();
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+		}
 		return uidBodyFreq;
 	}
 
@@ -157,12 +172,9 @@ public class WordDaoImpl implements WordDao {
 		posFile = new File(posPath);
 	}
 
-	@Override
 	public void get(String word) throws Exception {
 		w = (Word) HibernateUtil.get(Word.class, word);
 		setPath();
-		loadUidPos();
-		loadUidFreq();
 	}
 
 	@SuppressWarnings("unchecked")

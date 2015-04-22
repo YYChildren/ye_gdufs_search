@@ -1,14 +1,16 @@
 package com.ye.gdufs.service;
 
-import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.hibernate.Session;
 
 import com.ye.gdufs.dao.WordDaoImpl;
 import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.model.Result;
 import com.ye.gdufs.model.Word;
 import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
@@ -16,6 +18,10 @@ import com.ye.gdufs.util.SHFactory;
 import com.ye.gdufs.util.SentenceHandler;
 
 public class ResultCrt {
+	private String reqStr;
+	private SHFactory shf = SHFactory.getInstance();
+	private List<Result> resultL;
+	private WeakHashMap<String,WordDaoImpl> wordWDI = new WeakHashMap<>();;
 	static long urlCount;
 	static{
 		update();
@@ -33,13 +39,8 @@ public class ResultCrt {
 		}
 		System.gc();//垃圾回收，清理WeakHashMap缓存。
 	}
-	private String reqStr;
-	private SHFactory shf = SHFactory.getInstance();
-	private List<SimpleEntry<String, SimpleEntry<String, String>>> urlTitleContents;
-	private WeakHashMap<String,WordDaoImpl> wordWDI = new WeakHashMap<>();;
 
 	public ResultCrt() {
-		
 	}
 
 	public ResultCrt(String reqStr) {
@@ -57,11 +58,11 @@ public class ResultCrt {
 		return this;
 	}
 
-	public List<SimpleEntry<String, SimpleEntry<String, String>>> getUrlTitleContents() {
-		return urlTitleContents;
+	public List<Result> getResultL() {
+		return resultL;
 	}
 
-	private ResultCrt crtResult() {
+	private void crtResult() {
 		try {
 			ArrayList<WordDaoImpl> wdiArr = new ArrayList<WordDaoImpl>();
 			SentenceHandler sh = shf.buildHandler().analyze(reqStr);
@@ -72,15 +73,21 @@ public class ResultCrt {
 				WordDaoImpl wdi = null;
 				if(wordWDI.containsKey(word)){
 					wdi = wordWDI.get(word);
+				}else{
+					wdi = new WordDaoImpl();
+					wdi.get(word);
 				}
-				wdi = new WordDaoImpl();
-				wdi.get(word);
 				wdiArr.add(wdi);
 			}
+			 Analyzer uidAnalyze =  new Analyzer(wdiArr);
+			 uidAnalyze.analyze();
+			 Map<String,Double> wordWeight = uidAnalyze.getWordWeight();
+		     List<Entry<Long, Double>> uidWeightList = uidAnalyze.getUidWeightList();
+		     Extractor extractor = new Extractor(wordWeight,uidWeightList);
+		     extractor.extract();
+		     resultL =extractor.getResultL();
 		} catch (Exception e) {
 			Logs.printStackTrace(e);
-			return null;
 		}
-		return this;
 	}
 }

@@ -3,6 +3,9 @@ package com.ye.gdufs.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.util.HibernateUtil;
+
 @Entity
 public class Page {
 	private long uid;//url的mpq
@@ -49,6 +52,15 @@ public class Page {
 
 	public void setSerName(String serName) {
 		this.serName = serName;
+	}
+	
+	public static  long getPageCount(){
+		try {
+			return (long) HibernateUtil.execute(session -> session.createQuery("select count(p.uid) from Page p").uniqueResult());
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+			return  0;
+		}
 	}
 	
 }

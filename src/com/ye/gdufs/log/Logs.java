@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.global.GlobalArgs;
 
 import java.time.LocalDateTime;
 

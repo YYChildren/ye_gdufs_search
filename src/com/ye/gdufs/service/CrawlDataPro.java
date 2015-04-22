@@ -15,11 +15,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.ye.gdufs.GlobalArgs;
 import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
 import com.ye.gdufs.dao.DumpDao;
 import com.ye.gdufs.dao.DumpDaoImpl;
+import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Dump;
 import com.ye.gdufs.util.MsgUtil;

@@ -1,29 +1,37 @@
-package com.ye.gdufs;
+package com.ye.gdufs.global;
 
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.ye.gdufs.log.Logs;
-
 public final class GlobalArgs {
 	private static Document doc;
 	static {
 		try {
-			update("gdufs_search.xml", "UTF-8");
+			update();
 		} catch (IOException e) {
-			Logs.printStackTrace(e);
+			e.printStackTrace();
 		}
 	}
 
-	public static void update(String xmlPath, String charsetName)
+	public static void update()
 			throws IOException {
-		File f = new File(xmlPath);
-		doc = Jsoup.parse(f, charsetName);
+		URL gdufsSearchXmlUrl = GlobalArgs.class.getResource("/gdufs_search.xml");
+//		URL gdufsSearchXmlUrl = ClassLoader.getSystemResource("gdufs_search.xml");
+		BufferedInputStream bs = new BufferedInputStream(gdufsSearchXmlUrl.openStream());
+		StringBuilder htmlBuilder = new StringBuilder();
+		int nbytes = 0;
+		byte[]  b = new byte[8192];
+		String charSet = "UTF-8";
+		while((nbytes = bs.read(b)) != -1){
+			htmlBuilder.append(new String(b,0,nbytes,charSet));
+		}
+		doc = Jsoup.parse(htmlBuilder.toString());
 	}
 
 	public static Document getDoc() {

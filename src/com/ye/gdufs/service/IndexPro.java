@@ -12,11 +12,11 @@ import org.hibernate.Session;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.ye.gdufs.GlobalArgs;
 import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
 import com.ye.gdufs.dao.PageMd5Dao;
 import com.ye.gdufs.dao.PageMd5DaoImpl;
+import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Word;
 import com.ye.gdufs.util.HibernateSql;

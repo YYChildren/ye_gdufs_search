@@ -1,6 +1,8 @@
 package com.ye.gdufs;
 import org.junit.Test;
 
+import com.ye.gdufs.global.GlobalArgs;
+
 public class GlobalArgsTest {
 
 	@Test

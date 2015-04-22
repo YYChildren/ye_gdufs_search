@@ -3,10 +3,11 @@ package com.ye.gdufs.dao;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.hibernate.Session;
 
-import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.Page;
 import com.ye.gdufs.model.PageSer;
@@ -99,5 +100,16 @@ public class PageDaoImpl implements PageDao {
 	protected void setPath(){
 		String path = pageInfo[0] + "/" + page.getSerName() + "." + pageInfo[1];
 		pageFile = new File(path);
+	}
+	@Override
+	public void get(Serializable uid) {
+		try {
+			page = (Page) HibernateUtil.get(Page.class, uid);
+			setPath();
+			pageSer = (PageSer) Misc.readObject(pageFile);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -5,7 +5,7 @@
  */
 package com.ye.gdufs.util;
 
-import com.ye.gdufs.GlobalArgs;
+import com.ye.gdufs.global.GlobalArgs;
 
 import edu.hit.ir.ltp4j.NER;
 import edu.hit.ir.ltp4j.Postagger;
