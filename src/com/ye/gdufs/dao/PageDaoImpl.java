@@ -49,10 +49,11 @@ public class PageDaoImpl implements PageDao {
 	
 	@Override
 	public void rsave(Session session) throws FileNotFoundException, IOException{
-		session.createSQLQuery("replace into page(uid,url,titlefrequency,bodyfrequency,sername)"
-				+ " values(:uid,:url,:titlefrequency,:bodyfrequency,:sername)")
+		session.createSQLQuery("replace into page(uid,url,contentMd5,titlefrequency,bodyfrequency,sername)"
+				+ " values(:uid,:url,:contentMd5,:titlefrequency,:bodyfrequency,:sername)")
 				.setLong("uid", page.getUid())
 				.setString("url", page.getUrl())
+				.setString("contentMd5", page.getContentMd5())
 				.setInteger("titlefrequency", page.getTitleFrequency())
 				.setInteger("bodyfrequency", page.getBodyFrequency())
 				.setString("sername", page.getSerName()).executeUpdate();
@@ -90,10 +91,10 @@ public class PageDaoImpl implements PageDao {
 			 throw e;
 		}
 	}
-	@Override
-	public boolean isExistContentMd5(String contentMd5) throws Exception {
+	
+	public static boolean isExistContentMd5(String contentMd5) throws Exception {
 		HibernateSql hs = 
-				session -> !session.createQuery("select p.contentMd5 from PageMd5 p where p.contentMd5 = :md5")
+				session -> !session.createQuery("select p.contentMd5 from Page p where p.contentMd5 = :md5")
 				.setString("md5", contentMd5).list().isEmpty();
 		return (boolean) HibernateUtil.execute(hs);
 	}
@@ -111,5 +112,14 @@ public class PageDaoImpl implements PageDao {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	public static long getPageCount() {
+		try {
+			return (long) HibernateUtil.execute(session -> session.createQuery("select count(p.uid) from Page p"));
+		} catch (Exception e) {
+			Logs.printStackTrace(e);
+			return 0;
+		}
+		
 	}
 }

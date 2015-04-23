@@ -25,6 +25,10 @@ public class PagePro {
 	public void setUrl(String url) {
 		page.setUrl(url);
 	}
+	
+	public void setContentMd5(String contentMd5) {
+		page.setContentMd5(contentMd5);
+	}
 
 	public void setTitleFrequency(int titleFrequency) {
 		page.setTitleFrequency(titleFrequency);

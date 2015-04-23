@@ -41,12 +41,13 @@ public class WordDaoImpl implements WordDao {
 	public WordDaoImpl(String word, Map<Long, WordPos> uidPos,
 			Map<Long, Integer> uidTitleFreq, Map<Long, Integer> uidBodyFreq) {
 		this.uidPos = uidPos;
+		this.w.setWid(MPQ.getInstance().hash(word));
 		this.w.setWord(word);
 		this.w.setUidTitleCount(uidTitleFreq.size());
 		this.w.setUidBodyCount(uidBodyFreq.size());
 		this.uidTitleFreq = uidTitleFreq;
 		this.uidBodyFreq = uidBodyFreq;
-		String serName = Long.toHexString(MPQ.getInstance().hash(word));
+		String serName = Long.toHexString(this.w.getWid());
 		this.w.setSerName(serName);
 		setPath();
 	}
@@ -116,7 +117,8 @@ public class WordDaoImpl implements WordDao {
 	@Override
 	public void rsave(Session session) throws IOException {
 		session.createSQLQuery(
-				"replace into word(word,uidtitlecount,uidbodycount,sername) values(:word,:uidtitlecount,:uidbodycount,:serName)")
+				"replace into word(wid,word,uidtitlecount,uidbodycount,sername) values(:wid,:word,:uidtitlecount,:uidbodycount,:serName)")
+				.setLong("wid", w.getWid())
 				.setString("word", w.getWord())
 				.setLong("uidtitlecount", w.getUidTitleCount())
 				.setLong("uidbodycount", w.getUidBodyCount())
@@ -173,7 +175,8 @@ public class WordDaoImpl implements WordDao {
 	}
 
 	public void get(String word) throws Exception {
-		w = (Word) HibernateUtil.get(Word.class, word);
+		long wid = MPQ.getInstance().hash(word);
+		w = (Word) HibernateUtil.get(Word.class, wid);
 		setPath();
 	}
 

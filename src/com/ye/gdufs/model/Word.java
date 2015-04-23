@@ -6,7 +6,8 @@ import javax.persistence.Id;
 
 @Entity
 public final class Word{
-	public final static int WORD_MAX_SIZE = 64;
+	public final static int WORD_MAX_SIZE = 2048;
+	private long wid;
 	private String word;
 	private long uidTitleCount;
 	private long uidBodyCount;
@@ -16,11 +17,17 @@ public final class Word{
 		super();
 	}
 	@Id
-	public String getWord() {
-		return word;
+	public void setWid(long wid) {
+		this.wid = wid;
 	}
 	public void setWord(String word) {
 		this.word = word;
+	}
+	public String getWord() {
+		return word;
+	}
+	public long getWid() {
+		return wid;
 	}
 	public long getUidTitleCount() {
 		return uidTitleCount;

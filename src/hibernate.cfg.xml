@@ -9,7 +9,7 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-        <property name="connection.url">jdbc:mysql://localhost/gdufs_search</property>
+        <property name="connection.url">jdbc:mysql://localhost/gdufs_search2</property>
         <property name="connection.username">children</property>
         <property name="connection.password">123success</property>
 
@@ -42,7 +42,6 @@
         <mapping class="com.ye.gdufs.model.Word" />
         <class-cache class="com.ye.gdufs.model.CrawlData" usage="read-only"/>
         <class-cache class="com.ye.gdufs.model.Page" usage="read-only"/>
-        <class-cache class="com.ye.gdufs.model.PageMd5" usage="read-only"/>
         <class-cache class="com.ye.gdufs.model.Word" usage="read-write"/>
     </session-factory>
 </hibernate-configuration>

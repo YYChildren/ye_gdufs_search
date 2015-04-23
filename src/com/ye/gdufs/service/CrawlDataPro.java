@@ -1,11 +1,9 @@
 package com.ye.gdufs.service;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,33 +19,36 @@ import com.ye.gdufs.dao.DumpDao;
 import com.ye.gdufs.dao.DumpDaoImpl;
 import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.model.CrawlData;
 import com.ye.gdufs.model.Dump;
+import com.ye.gdufs.model.Page;
+import com.ye.gdufs.util.MPQ;
 import com.ye.gdufs.util.MsgUtil;
 
 public class CrawlDataPro implements java.io.Serializable {
 	private static final long serialVersionUID = 2423023121219596833L;
-	public static final int defaultTimeout = 5000;
-	private static final int retryTime = 12;
+	private final static String KEY = "CrawlDataPro";
+	public static final int TIMEOUT = 5000;
+	private static final int RETRY_TIME = 12;
+	private static final int NOT_MATCH_ADD = 1;
+	private static final String URL_regex = "^https?.*";
+	private static MPQ mpq = MPQ.getInstance();
 	private static CrawlDataPro crawl = null;
-	private final static String key = "crawl";
 
 	private int nThreads;
 	private int maxDepth;
+	private int notMatxhDepth;
+	private String urlFilter;
 	// url -- 深度
-	private Queue<AbstractMap.SimpleEntry<String, Integer>> urlsReady;
-	private Set<String> urlsFinished;
+	private Queue<SimpleEntry<String, Integer>> urlsReady;
 	private Boolean isStarted = false;
 
 	public int getnThreads() {
 		return nThreads;
 	}
 
-	public Queue<AbstractMap.SimpleEntry<String, Integer>> getUrlsReady() {
+	public Queue<SimpleEntry<String, Integer>> getUrlsReady() {
 		return urlsReady;
-	}
-
-	public Set<String> getUrlsFinished() {
-		return urlsFinished;
 	}
 
 	public static CrawlDataPro getInstance() {
@@ -69,15 +70,8 @@ public class CrawlDataPro implements java.io.Serializable {
 	}
 
 	private CrawlDataPro() {
-		nThreads = GlobalArgs.getCrawlThread();
-		maxDepth = GlobalArgs.getSeedDepth();
-		urlsReady = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<String, Integer>>();
-		String[] seeds = GlobalArgs.getSeeds();
-		for (String seed : seeds) {
-			urlsReady.offer(new AbstractMap.SimpleEntry<String, Integer>(seed,
-					1));
-		}
-		urlsFinished = new TreeSet<String>();
+		updateThread();
+		updateSeeds();
 	}
 
 	public void start() {
@@ -100,10 +94,6 @@ public class CrawlDataPro implements java.io.Serializable {
 		}
 		if (GlobalArgs.isSeedsUpdate() || urlsReady.isEmpty()) {
 			updateSeeds();
-			urlsFinished.clear();
-		}
-		if (GlobalArgs.isUrlFinishUpdate()) {
-			urlsFinished.clear();
 		}
 	}
 
@@ -113,12 +103,14 @@ public class CrawlDataPro implements java.io.Serializable {
 
 	private void updateSeeds() {
 		String[] seeds = GlobalArgs.getSeeds();
-		urlsReady.clear();
+		urlsReady = new ConcurrentLinkedQueue<SimpleEntry<String, Integer>>();
 		for (String seed : seeds) {
-			urlsReady.offer(new AbstractMap.SimpleEntry<String, Integer>(seed,
+			urlsReady.offer(new SimpleEntry<String, Integer>(seed,
 					1));
 		}
 		maxDepth = GlobalArgs.getSeedDepth();
+		notMatxhDepth = maxDepth - NOT_MATCH_ADD; 
+		urlFilter = GlobalArgs.seedsUrlFilter();
 	}
 
 	private void loopCrawl() {
@@ -133,10 +125,9 @@ public class CrawlDataPro implements java.io.Serializable {
 				sleep();
 				continue;
 			}
-			AbstractMap.SimpleEntry<String, Integer> urlDepth = null;
+			SimpleEntry<String, Integer> urlDepth = null;
 			do {
-				AbstractMap.SimpleEntry<String, Integer> urlDepthTmp = urlsReady
-						.poll();
+				SimpleEntry<String, Integer> urlDepthTmp = urlsReady.poll();
 				if (urlDepthTmp == null) {
 					urlDepth = urlDepthTmp;
 					break;
@@ -144,25 +135,23 @@ public class CrawlDataPro implements java.io.Serializable {
 				String url = urlDepthTmp.getKey();
 				Integer depth = urlDepthTmp.getValue();
 				if (depth <= maxDepth) {
-					if (!urlsFinished.contains(url)) {
-						urlDepth = urlDepthTmp;
-						break;
-					}
+					urlDepth = urlDepthTmp;
+					break;
 				} else {
+					Logs.info_msg("MaxDepth:" + url);
 					System.err.println("MaxDepth:" + url);
 				}
 			} while (true);
 			if (urlDepth != null) {
-				CrawlRun command = new CrawlRun(urlDepth, urlsReady, maxDepth);
-				executor.execute(command);
-				urlsFinished.add(urlDepth.getKey());
 				readyEmptyTime = 0;
+				CrawlRun command = new CrawlRun(urlDepth);
+				executor.execute(command);
 			} else {
 				++readyEmptyTime;
 			}
-			if (readyEmptyTime >= retryTime) {
+			if (readyEmptyTime >= RETRY_TIME) {
 				readyEmptyTime = 0;
-				// stop();
+				break;
 			}
 		}
 		dump();
@@ -171,14 +160,13 @@ public class CrawlDataPro implements java.io.Serializable {
 
 	private void sleep() {
 		try {
-			Thread.sleep(CrawlDataPro.defaultTimeout);
+			Thread.sleep(CrawlDataPro.TIMEOUT);
 		} catch (InterruptedException e) {
 			Logs.printStackTrace(e);
 		}
 	}
 
 	private void dump() {
-		// save to mysql
 		synchronized (this) {
 			Boolean tempStarted = this.isStarted;
 			this.isStarted = false;
@@ -189,6 +177,7 @@ public class CrawlDataPro implements java.io.Serializable {
 
 	public void stop() {
 		synchronized (this) {
+			Logs.info_msg("Crawl stopping");
 			System.err.println("Crawl stopping");
 			isStarted = false;
 			sleep();
@@ -196,16 +185,13 @@ public class CrawlDataPro implements java.io.Serializable {
 	}
 
 	private static CrawlDataPro getCrawl() {
-		// 从数据库读出对象的二进制流
 		try {
 			DumpDao dumpDao = new DumpDaoImpl();
-			Dump dump = dumpDao.get(key);
+			Dump dump = dumpDao.get(KEY);
 			if (dump == null) {
 				return null;
 			}
-			byte[] b = dump.getObjByte();
-			CrawlDataPro obj = (CrawlDataPro) MsgUtil.bytes2Object(b);
-			return obj;
+			return (CrawlDataPro) dump.getObj();
 		} catch (Exception e) {
 			Logs.printStackTrace(e);
 			return null;
@@ -214,56 +200,64 @@ public class CrawlDataPro implements java.io.Serializable {
 
 	private static void putCrawl(Object obj) {
 		try {
-			byte[] b = MsgUtil.object2Bytes(obj);
-			DumpDao dumpDao = new DumpDaoImpl(key, b);
+			DumpDao dumpDao = new DumpDaoImpl(KEY, obj);
 			dumpDao.save();
 		} catch (Exception e) {
 			Logs.printStackTrace(e);
 		}
 	}
-}
 
-class CrawlRun implements Runnable {
-	// private urlsReadyueue<String> urlsReady;
-	AbstractMap.SimpleEntry<String, Integer> urlDepth;
-	Queue<AbstractMap.SimpleEntry<String, Integer>> urlsReady;
-	int maxDepth;
-	private final String regex = "^https?.*";
+	private class CrawlRun implements Runnable {
+		SimpleEntry<String, Integer> urlDepth;
+		public CrawlRun(SimpleEntry<String, Integer> urlDepth) {
+			this.urlDepth = urlDepth;
+		}
 
-	public CrawlRun(AbstractMap.SimpleEntry<String, Integer> urlDepth,
-			Queue<AbstractMap.SimpleEntry<String, Integer>> urlsReady,
-			int maxDepth) {
-		this.urlDepth = urlDepth;
-		this.urlsReady = urlsReady;
-		this.maxDepth = maxDepth;
-	}
-
-	@Override
-	public void run() {
-		try {
-			String url = urlDepth.getKey();
-			int depth = urlDepth.getValue();
-			Document doc;
-			doc = Jsoup.connect(url).timeout(CrawlDataPro.defaultTimeout).get();
-			Elements links = doc.select("a[href]");
-			String content = doc.toString();
-			CrawlDataDao crd = new CrawlDataDaoImpl(url, content);
-			crd.save();
-			List<AbstractMap.SimpleEntry<String, Integer>> urls = new LinkedList<>();
-			// if (++depth > maxDepth) {
-			// return;
-			// }
-			++depth;
-			for (Element link : links) {
-				String newUrl = link.attr("abs:href").trim();
-				if (newUrl.matches(regex)) {// 只要http和https协议
-					urls.add(new AbstractMap.SimpleEntry<String, Integer>(
-							newUrl, depth));
+		@Override
+		public void run() {
+			try {
+				String url = urlDepth.getKey();
+				int depth = urlDepth.getValue();
+				Document doc;
+				doc = Jsoup.connect(url).timeout(CrawlDataPro.TIMEOUT).get();
+				String content = doc.toString();
+				String contentMd5 = MsgUtil.msgDigest(content);
+				if(CrawlDataDaoImpl.get(contentMd5)){
+					return;
 				}
+				CrawlDataDao crd = new CrawlDataDaoImpl();
+				CrawlData data = new CrawlData();
+				long uid = mpq.hash(url);
+				String serName = Long.toHexString(uid);
+				data.setUid(uid);
+				data.setUrl(url);
+				data.setContentMd5(contentMd5);
+				data.setSerName(serName);
+				crd.setCrawlData(data);
+				crd.setContent(content);
+				crd.save();
+				Elements links = doc.select("a[href]");
+				List<SimpleEntry<String, Integer>> urls = new LinkedList<>();
+				++depth;
+				for (Element link : links) {
+					String newUrl = link.attr("abs:href").trim();
+					if(newUrl.length() > Page.URL_MAX_SIZE || newUrl.length() == 0){
+						continue;
+					}
+					if (newUrl.matches(URL_regex)) {// 只要http和https协议
+						int newDepth;
+						if(newUrl.contains(urlFilter)){
+							newDepth = depth;
+						}else{
+							newDepth = notMatxhDepth > depth ? notMatxhDepth : depth;
+						}
+						urls.add(new SimpleEntry<String, Integer>(newUrl, newDepth));
+					}
+				}
+				urlsReady.addAll(urls);
+			} catch (Exception e) {
+				Logs.printStackTrace(e);
 			}
-			urlsReady.addAll(urls);
-		} catch (Exception e) {
-			Logs.printStackTrace(e);
 		}
 	}
 }

@@ -1,35 +1,31 @@
-drop table if exists Dump;
-drop table if exists Page;
-drop table if exists PageMd5;
-drop table if exists Word;
+use gdufs_search2;
 drop table if exists crawldata;
-create table crawldata (
+drop table if exists Page;
+drop table if exists Word;
+create table CrawlData (
 id bigint not null auto_increment,
-url varchar(2048),
-content mediumblob,
+uid bigint not null,
+url varchar(2048) not null,
+contentMd5 char(32) not null,
+serName char(16) not null,
 primary key (id)
 );
-create table Dump (
-keyStr char(16) not null,
-objByte mediumblob,
-primary key (keyStr)
-);
+create index crawldata_contentMd5Index on CrawlData(contentMd5);
 create table Page (
 uid bigint not null,
-url varchar(2048),
+url varchar(2048) not null,
+contentMd5 char(32) not null,
 titleFrequency integer not null,
 bodyFrequency integer not null,
-serName char(16),
+serName char(16) not null,
 primary key (uid)
 );
-create table PageMd5 (
-contentMd5 char(32) not null,
-primary key (contentMd5)
-);
+create index page_contentMd5Index on Page(contentMd5);
 create table Word (
-word char(64),
+wid bigint(20) not null,
+word varchar(2048) not null,
 uidTitleCount bigint not null,
 uidBodyCount bigint not null,
-serName char(16),
-primary key (word)
+serName char(16) not null,
+primary key (wid)
 );

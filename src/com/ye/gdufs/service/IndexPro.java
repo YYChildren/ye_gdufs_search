@@ -14,10 +14,10 @@ import org.jsoup.nodes.Document;
 
 import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
-import com.ye.gdufs.dao.PageMd5Dao;
-import com.ye.gdufs.dao.PageMd5DaoImpl;
+import com.ye.gdufs.dao.PageDaoImpl;
 import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
+import com.ye.gdufs.model.CrawlData;
 import com.ye.gdufs.model.Word;
 import com.ye.gdufs.util.HibernateSql;
 import com.ye.gdufs.util.HibernateUtil;
@@ -28,7 +28,7 @@ import com.ye.gdufs.util.SentenceHandler;
 
 public final class IndexPro implements java.io.Serializable{
 	private static final long serialVersionUID = -7940609119323972989L;
-	private final static String key = "indexpro";
+	private final static String KEY = "IndexPro";
 	private static IndexPro indexPro = null;
 		
 	private long startId;
@@ -150,11 +150,11 @@ public final class IndexPro implements java.io.Serializable{
 		Logs.info_msg("---------------------dump stopped--------------------");
 	}
 	
-	private static void dump(java.io.Serializable o) throws Exception {
-		Misc.dumpObject(key, o);
+	private static void dump(Object o) throws Exception {
+		Misc.dumpObject(KEY, o);
 	}
 	private static IndexPro getDump() throws Exception{
-		return (IndexPro) Misc.getDumpObject(key);
+		return (IndexPro) Misc.getDumpObject(KEY);
 	}
 
 	class PageProThread implements Runnable{
@@ -163,7 +163,6 @@ public final class IndexPro implements java.io.Serializable{
 		WordPro wordPro;
 		PagePro pageProLocal;
 		WordPro wordProLocal;
-		String contentMd5;
 		public PageProThread(long id,WordPro wordPro) {
 			this.id = id;
 			this.wordPro = wordPro;
@@ -180,17 +179,19 @@ public final class IndexPro implements java.io.Serializable{
 				//-----------------clean----------------------------//
 				clean();
 				CrawlDataDao cdd = new CrawlDataDaoImpl();
-				if(cdd.get(id) == null){
+				cdd.get(id);
+				CrawlData cd = cdd.getCrawlData();
+				String content =  cdd.getContent();
+				if(cd == null || content == null){
 					return;
 				}
-				String content = cdd.getContent();
 				Document html = Jsoup.parse(content);
 				String title = html.title().trim();
 				if(title.equals("")){
 					return;
 				}
-				contentMd5= Misc.getContentMd5(html);
-				if(PageMd5DaoImpl.get(contentMd5) != null){
+				String contentMd5 = cd.getContentMd5();
+				if(PageDaoImpl.isExistContentMd5(contentMd5)){
 					return;
 				}
 				String body = html.body().toString();
@@ -201,10 +202,11 @@ public final class IndexPro implements java.io.Serializable{
 				
 				//-----------------create----------------------------//
 				create();
-				String url = cdd.getUrl();
-				long uid = mpq.hash(url);
+				String url = cd.getUrl();
+				long uid = cd.getUid();
 				pageProLocal.setUid(uid);
 				pageProLocal.setUrl(url);
+				pageProLocal.setContentMd5(contentMd5);
 				
 				
 				//-------------------------------------------------------begin of title-----------------------------------------------------------//
@@ -314,7 +316,6 @@ public final class IndexPro implements java.io.Serializable{
 		}
 		private void clean(){
 			pageProLocal = null;
-			contentMd5 = null;
 			wordProLocal = null;
 		}
 		
@@ -325,7 +326,6 @@ public final class IndexPro implements java.io.Serializable{
 		
 		private void save(){
 			UUID uuid = UUID.randomUUID();
-			PageMd5Dao pmd = new PageMd5DaoImpl(contentMd5);
 			try {
 				if(pageProLocal == null){
 					return;
@@ -334,7 +334,6 @@ public final class IndexPro implements java.io.Serializable{
 					@Override
 					public Object execute(Session session) throws Exception {
 						pageProLocal.rsave(session);
-						pmd.rsave(session);
 						wordPro.psave(uuid,wordProLocal);
 						return null;
 					}
@@ -342,7 +341,6 @@ public final class IndexPro implements java.io.Serializable{
 				HibernateUtil.execute(hs);
 			} catch (Exception e) {
 				pageProLocal.rrollback();
-				pmd.rrollback();
 				wordPro.prollback(uuid);
 				Logs.printStackTrace(e);
 			}

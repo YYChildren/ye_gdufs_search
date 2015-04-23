@@ -22,7 +22,6 @@ public final class GlobalArgs {
 	public static void update()
 			throws IOException {
 		URL gdufsSearchXmlUrl = GlobalArgs.class.getResource("/gdufs_search.xml");
-//		URL gdufsSearchXmlUrl = ClassLoader.getSystemResource("gdufs_search.xml");
 		BufferedInputStream bs = new BufferedInputStream(gdufsSearchXmlUrl.openStream());
 		StringBuilder htmlBuilder = new StringBuilder();
 		int nbytes = 0;
@@ -41,7 +40,11 @@ public final class GlobalArgs {
 	public static boolean isSeedsUpdate() {
 		return !doc.select("seeds[update=true]").isEmpty();
 	}
-
+	
+	public static String seedsUrlFilter() {
+		return doc.select("seeds").first().attr("urlfilter");
+	}
+	
 	public static String[] getSeeds() {
 		Elements els = doc.select("seeds").first().getElementsByTag("value");
 		String[] result = new String[els.size()];
@@ -90,7 +93,13 @@ public final class GlobalArgs {
 		return Integer.parseInt(doc.select("seeds").first().attr("depth"));
 	}
 
-	
+
+	public static String[] getCrawlDataInfo() {
+		return getDataInfo("crawlData");
+	}
+	public static String[] getDumpInfo() {
+		return getDataInfo("dump");
+	}
 	public static String[] getPageInfo(){
 		return getDataInfo("page");
 	}

@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.PriorityQueue;
 
+import com.ye.gdufs.dao.PageDaoImpl;
 import com.ye.gdufs.dao.WordDaoImpl;
-import com.ye.gdufs.model.Page;
 import com.ye.gdufs.model.Word;
 
 public class Analyzer {
@@ -27,7 +27,7 @@ public class Analyzer {
 	public Analyzer(){}
 	public Analyzer(ArrayList<WordDaoImpl> wdiArr){ this.wdiArr = wdiArr; }
 	public static void updateUrlCount(){
-		urlCount = Page.getPageCount();
+		urlCount = PageDaoImpl.getPageCount();
 	}
 	public List<Entry<Long, Double>> getUidWeightList() {
 		return uidWeightList;

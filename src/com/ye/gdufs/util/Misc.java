@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -22,27 +21,23 @@ import com.ye.gdufs.model.Dump;
 
 public class Misc {
 	private static SHFactory shf ;
-	private final static int CONTENT_SUB_LEN = 1000;
 	
-	public static  void dumpObject(String key,Serializable o) throws Exception {
+	public static  void dumpObject(String key,Object obj) throws Exception {
 		try {
-			byte[] b = MsgUtil.object2Bytes(o);
-			DumpDao dumpDao = new DumpDaoImpl(key, b);
+			DumpDao dumpDao = new DumpDaoImpl(key, obj);
 			dumpDao.save();
 		} catch (IOException e) {
 			Logs.printStackTrace(e);
 		}
 	}
-	public static Serializable getDumpObject(String key) throws Exception{
+	public static Object getDumpObject(String key) throws Exception{
 		try {
 			DumpDao dumpDao = new DumpDaoImpl();
 			Dump dump = dumpDao.get(key);
 			if (dump == null) {
 				return null;
 			}
-			byte[] b = dump.getObjByte();
-			Serializable obj = (Serializable) MsgUtil.bytes2Object(b);
-			return obj;
+			return dump.getObj();
 		} catch (ClassNotFoundException | IOException e) {
 			Logs.printStackTrace(e);
 			return null;
@@ -79,19 +74,7 @@ public class Misc {
 	
 	public static String getContentMd5(Document html) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		String bodyString = html.body().toString();
-		int length = bodyString.length();
-		StringBuilder sb = new StringBuilder();
-		sb.append(html.title());
-		int[] starts = {0,(length - CONTENT_SUB_LEN )/2,length - CONTENT_SUB_LEN };
-		for(int start : starts){
-			if(start < 0 ){
-				break;
-			}
-			int endT = start + CONTENT_SUB_LEN ;
-			int end = endT < length ? endT : length;
-			sb.append(bodyString.substring(start, end));
-		}
-		return MsgUtil.msgDigest(sb.toString());
+		return MsgUtil.msgDigest(bodyString);
 	}
 	public static SentenceHandler analyzeSentence(String sentence) throws Exception{
 		if(shf == null){

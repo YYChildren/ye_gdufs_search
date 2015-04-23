@@ -12,6 +12,7 @@ import com.ye.gdufs.util.SHFactory;
 public class TestSentenceHandler {
     
     public static void main(String[] args) {
+    	//System.out.println(System.getProperties());
     	String sentence = "广东外语外贸大学真漂亮。";
         test(sentence);
         sentence = "我是中国人，我来自中国。";

@@ -1,27 +1,19 @@
 package com.ye.gdufs.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
-public final class Dump {
+public class Dump implements java.io.Serializable {
+	private static final long serialVersionUID = -3931102643835864688L;
 	private String keyStr;
-	private byte[] objByte;
-	
-	public Dump() {
-		super();
-	}
-	@Id
+	private Object obj;
 	public String getKeyStr() {
 		return keyStr;
 	}
 	public void setKeyStr(String keyStr) {
 		this.keyStr = keyStr;
 	}
-	public void setObjByte(byte[] objByte) {
-		this.objByte = objByte;
+	public Object getObj() {
+		return obj;
 	}
-	public byte[] getObjByte() {
-		return objByte;
+	public void setObj(Object obj) {
+		this.obj = obj;
 	}
 }

@@ -9,11 +9,11 @@ public class CrawlTest {
 		CrawlDataPro c = CrawlDataPro.getInstance();
 		c.start();
 	}
-	@Test
-	public void testGetQueue(){
-		CrawlDataPro c = CrawlDataPro.getInstance();
-		System.out.println(c.getUrlsReady());
-	}
+//	@Test
+//	public void testGetQueue(){
+//		CrawlDataPro c = CrawlDataPro.getInstance();
+//		System.out.println(c.getUrlsReady());
+//	}
 	public static void main(String[] args) {
 		CrawlTest t = new CrawlTest();
 		t.testStart();

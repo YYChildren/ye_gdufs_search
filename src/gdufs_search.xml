@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <search>
     <!-- 每次重新开始 -->
-	<seeds update="false" depth="10">
+	<seeds update="false" depth="10" urlfilter="gdufs.edu.cn">
 	   <value>http://www.gdufs.edu.cn/</value>
 	</seeds>
 	<urlfinishupdate>true</urlfinishupdate>
@@ -13,6 +13,8 @@
 	</pagethread>
 	
 	<data basepath="G:/gdufs_search">
+	   <page dir="crawlData" extend="cd"/>
+	   <page dir="dump" extend="dp"/>
 	   <page dir="page" extend="pg"/>
 	   <wordfreq dir="wordfreq" extend="wf"/>
 	   <wordpos dir="wordpos" extend="wp"/>
