@@ -14,7 +14,6 @@ public class Logs {
 		String log_path;
 		String[] errorLogsInfo = GlobalArgs.getErrorLogsinfo();
 		log_path = errorLogsInfo[0] + "/" + errorLogsInfo[1] + "." + errorLogsInfo[2]; 
-		System.out.println("LogPath:" + log_path);
 		try {
 			log_writer = new PrintWriter(new FileWriter(log_path,false));
 		} catch (IOException e) {

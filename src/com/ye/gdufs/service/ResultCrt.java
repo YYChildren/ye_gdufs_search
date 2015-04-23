@@ -76,6 +76,7 @@ public class ResultCrt {
 				}else{
 					wdi = new WordDaoImpl();
 					wdi.get(word);
+					wordWDI.put(word, wdi);
 				}
 				wdiArr.add(wdi);
 			}
