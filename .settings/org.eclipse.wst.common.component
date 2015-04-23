@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="ye_gdufs_search">
+    <wb-module deploy-name="gdufs_search">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
-        <property name="context-root" value="ye_gdufs_search"/>
-        <property name="java-output-path" value="/ye_gdufs_search/build/classes"/>
+        <property name="context-root" value="gdufs_search"/>
+        <property name="java-output-path" value="/gdufs_search/build/classes"/>
     </wb-module>
 </project-modules>

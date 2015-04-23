@@ -15,21 +15,19 @@ import org.jsoup.select.Elements;
 
 import com.ye.gdufs.dao.CrawlDataDao;
 import com.ye.gdufs.dao.CrawlDataDaoImpl;
-import com.ye.gdufs.dao.DumpDao;
-import com.ye.gdufs.dao.DumpDaoImpl;
 import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.log.Logs;
 import com.ye.gdufs.model.CrawlData;
-import com.ye.gdufs.model.Dump;
 import com.ye.gdufs.model.Page;
 import com.ye.gdufs.util.MPQ;
+import com.ye.gdufs.util.Misc;
 import com.ye.gdufs.util.MsgUtil;
 
 public class CrawlDataPro implements java.io.Serializable {
 	private static final long serialVersionUID = 2423023121219596833L;
 	private final static String KEY = "CrawlDataPro";
-	public static final int TIMEOUT = 5000;
-	private static final int RETRY_TIME = 12;
+	public static final int TIMEOUT = 20000;
+	private static final int RETRY_TIME = 3;
 	private static final int NOT_MATCH_ADD = 1;
 	private static final String URL_regex = "^https?.*";
 	private static MPQ mpq = MPQ.getInstance();
@@ -60,7 +58,7 @@ public class CrawlDataPro implements java.io.Serializable {
 
 	static synchronized void syncInit() {
 		if (CrawlDataPro.crawl == null) {
-			CrawlDataPro crawlT = getCrawl();
+			CrawlDataPro crawlT = (CrawlDataPro) Misc.getDumpObject(KEY);
 			if (crawlT != null) {
 				CrawlDataPro.crawl = crawlT;
 			} else {
@@ -86,6 +84,8 @@ public class CrawlDataPro implements java.io.Serializable {
 		doUpdate();
 		loopCrawl();
 		CrawlDataPro.crawl = null;
+		System.err.println("Crawl stopped");
+		Logs.info_msg("Crawl stopped");
 	}
 
 	private void doUpdate() {
@@ -105,11 +105,10 @@ public class CrawlDataPro implements java.io.Serializable {
 		String[] seeds = GlobalArgs.getSeeds();
 		urlsReady = new ConcurrentLinkedQueue<SimpleEntry<String, Integer>>();
 		for (String seed : seeds) {
-			urlsReady.offer(new SimpleEntry<String, Integer>(seed,
-					1));
+			urlsReady.offer(new SimpleEntry<String, Integer>(seed, 1));
 		}
 		maxDepth = GlobalArgs.getSeedDepth();
-		notMatxhDepth = maxDepth - NOT_MATCH_ADD; 
+		notMatxhDepth = maxDepth - NOT_MATCH_ADD;
 		urlFilter = GlobalArgs.seedsUrlFilter();
 	}
 
@@ -147,7 +146,9 @@ public class CrawlDataPro implements java.io.Serializable {
 				CrawlRun command = new CrawlRun(urlDepth);
 				executor.execute(command);
 			} else {
+				dump();
 				++readyEmptyTime;
+				Logs.info_msg("RetryTime:" + readyEmptyTime);
 			}
 			if (readyEmptyTime >= RETRY_TIME) {
 				readyEmptyTime = 0;
@@ -155,7 +156,6 @@ public class CrawlDataPro implements java.io.Serializable {
 			}
 		}
 		dump();
-		System.err.println("Crawl stopped");
 	}
 
 	private void sleep() {
@@ -170,7 +170,7 @@ public class CrawlDataPro implements java.io.Serializable {
 		synchronized (this) {
 			Boolean tempStarted = this.isStarted;
 			this.isStarted = false;
-			putCrawl(this);
+			Misc.dumpObject(KEY, this);
 			this.isStarted = tempStarted;
 		}
 	}
@@ -184,31 +184,9 @@ public class CrawlDataPro implements java.io.Serializable {
 		}
 	}
 
-	private static CrawlDataPro getCrawl() {
-		try {
-			DumpDao dumpDao = new DumpDaoImpl();
-			Dump dump = dumpDao.get(KEY);
-			if (dump == null) {
-				return null;
-			}
-			return (CrawlDataPro) dump.getObj();
-		} catch (Exception e) {
-			Logs.printStackTrace(e);
-			return null;
-		}
-	}
-
-	private static void putCrawl(Object obj) {
-		try {
-			DumpDao dumpDao = new DumpDaoImpl(KEY, obj);
-			dumpDao.save();
-		} catch (Exception e) {
-			Logs.printStackTrace(e);
-		}
-	}
-
 	private class CrawlRun implements Runnable {
 		SimpleEntry<String, Integer> urlDepth;
+
 		public CrawlRun(SimpleEntry<String, Integer> urlDepth) {
 			this.urlDepth = urlDepth;
 		}
@@ -218,13 +196,23 @@ public class CrawlDataPro implements java.io.Serializable {
 			try {
 				String url = urlDepth.getKey();
 				int depth = urlDepth.getValue();
-				Document doc;
-				doc = Jsoup.connect(url).timeout(CrawlDataPro.TIMEOUT).get();
+				Document doc = null;
+				try {
+					doc = Jsoup
+							.connect(url)
+							.userAgent(
+									"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)")
+							.timeout(CrawlDataPro.TIMEOUT).get();
+				} catch (java.net.SocketTimeoutException e) {
+					throw new java.net.SocketTimeoutException("Url: "+url+"  Msg:"+e.getMessage());
+				}
 				String content = doc.toString();
 				String contentMd5 = MsgUtil.msgDigest(content);
-				if(CrawlDataDaoImpl.get(contentMd5)){
+				if (CrawlDataDaoImpl.isExistMd5(contentMd5)) {
+					System.err.println("contentMd5: "+contentMd5);
 					return;
 				}
+				System.out.println(url);
 				CrawlDataDao crd = new CrawlDataDaoImpl();
 				CrawlData data = new CrawlData();
 				long uid = mpq.hash(url);
@@ -241,17 +229,20 @@ public class CrawlDataPro implements java.io.Serializable {
 				++depth;
 				for (Element link : links) {
 					String newUrl = link.attr("abs:href").trim();
-					if(newUrl.length() > Page.URL_MAX_SIZE || newUrl.length() == 0){
+					if (newUrl.length() > Page.URL_MAX_SIZE
+							|| newUrl.length() == 0) {
 						continue;
 					}
 					if (newUrl.matches(URL_regex)) {// 只要http和https协议
 						int newDepth;
-						if(newUrl.contains(urlFilter)){
+						if (newUrl.matches(urlFilter)) {
 							newDepth = depth;
-						}else{
-							newDepth = notMatxhDepth > depth ? notMatxhDepth : depth;
+						} else {
+							newDepth = notMatxhDepth > depth ? notMatxhDepth
+									: depth;
 						}
-						urls.add(new SimpleEntry<String, Integer>(newUrl, newDepth));
+						urls.add(new SimpleEntry<String, Integer>(newUrl,
+								newDepth));
 					}
 				}
 				urlsReady.addAll(urls);

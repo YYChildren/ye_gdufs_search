@@ -3,6 +3,7 @@ package com.ye.gdufs.dao;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.hibernate.Session;
 
@@ -34,6 +35,7 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 	@Override
 	public void setCrawlData(CrawlData crawlData) {
 		this.crawlData = crawlData;
+		setPath();
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 
 	@Override
 	public String getContent() throws IOException {
-		return this.getContent();
+		return this.content;
 	}
 
 	@Override
@@ -56,6 +58,7 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 			HibernateUtil.execute(hs);
 		} catch (Exception e) {
 			rrollback();
+			throw e;
 		}
 	}
 
@@ -63,17 +66,17 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 			IOException, ClassNotFoundException {
 		session.save(crawlData);
 		try {
-			oldContent = (String) Misc.readObject(crawlDataFile);
+			oldContent = Misc.readString(crawlDataFile);
 		} catch (Exception e) {
 			oldContent = null;
 		}
-		Misc.writeObject(crawlDataFile, content);
+		Misc.writeString(crawlDataFile, content);
 	}
 
 	private void rrollback() {
 		if (oldContent != null) {
 			try {
-				Misc.writeObject(crawlDataFile, oldContent);
+				Misc.writeString(crawlDataFile, oldContent);
 			} catch (IOException e) {
 				Logs.printStackTrace(e);
 			}
@@ -82,16 +85,16 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 
 	@Override
 	public void get(long id) throws Exception {
-		setPath();
 		Class<?> c = CrawlData.class;
 		this.crawlData = (CrawlData) HibernateUtil.get(c, id);
-		this.content = (String) Misc.readObject(crawlDataFile);
+		setPath();
+		this.content = Misc.readString(crawlDataFile);
 	}
 
-	public static  boolean get(String contentMd5) {
+	public static  boolean isExistMd5(String contentMd5) {
 		try {
 			HibernateSql hs = session -> 
-			!session.createQuery("select cd.contentMd5 from CrawlDara cd where cd.contentMd5 = :md5")
+			!session.createQuery("select cd.contentMd5 from CrawlData cd where cd.contentMd5 = :md5")
 					.setString("md5", contentMd5).list().isEmpty();
 			return (boolean) HibernateUtil.execute(hs);
 		} catch (Exception e) {
@@ -102,6 +105,10 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 	@Override
 	public void delete() throws Exception {
 		HibernateUtil.delete(this.crawlData);
+		try {
+			crawlDataFile.delete();
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
@@ -125,6 +132,13 @@ public class CrawlDataDaoImpl implements CrawlDataDao {
 		CrawlData data = new CrawlData();
 		data.setId(id);
 		HibernateUtil.delete(data);
+		String path = crawlDataInfo[0] + "/" + data.getSerName() + "."
+				+ crawlDataInfo[1];
+		File crawlDataFile = new File(path);
+		try {
+			crawlDataFile.delete();
+		} catch (Exception e) {
+		}
 	}
 
 	public void setPath() {

@@ -9,6 +9,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.ye.gdufs.util.MsgUtil;
+
 public final class GlobalArgs {
 	private static Document doc;
 	static {
@@ -26,11 +28,12 @@ public final class GlobalArgs {
 		StringBuilder htmlBuilder = new StringBuilder();
 		int nbytes = 0;
 		byte[]  b = new byte[8192];
-		String charSet = "UTF-8";
+		String charSet = MsgUtil.CHARSET;
 		while((nbytes = bs.read(b)) != -1){
 			htmlBuilder.append(new String(b,0,nbytes,charSet));
 		}
 		doc = Jsoup.parse(htmlBuilder.toString());
+		bs.close();
 	}
 
 	public static Document getDoc() {
@@ -95,7 +98,7 @@ public final class GlobalArgs {
 
 
 	public static String[] getCrawlDataInfo() {
-		return getDataInfo("crawlData");
+		return getDataInfo("crawldata");
 	}
 	public static String[] getDumpInfo() {
 		return getDataInfo("dump");
@@ -112,8 +115,8 @@ public final class GlobalArgs {
 	private static String[] getDataInfo(String type){
 		Element data = doc.select("data[basepath]").first();
 		String basePath = data.attr("basepath"); 
-		Element subData =  data.getElementsByTag(type).first();
-		String path = basePath + "/" + subData.attr("dir");
+		Element subData =  data.select("item[dir="+type+"]").first();
+		String path = basePath + "/" + type;
 		String extend = subData.attr("extend");
 		String[] result = {path,extend};
 		return result;

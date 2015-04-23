@@ -1,6 +1,8 @@
 package com.ye.gdufs.dao;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import com.ye.gdufs.global.GlobalArgs;
 import com.ye.gdufs.model.Dump;
@@ -18,14 +20,22 @@ public class DumpDaoImpl implements DumpDao{
 		dump = new Dump();
 		dump.setKeyStr(key);
 		dump.setObj(obj);
+		setPath();
 	}
 	@Override
-	public void save() throws Exception{
+	public void save() throws FileNotFoundException, IOException{
 		Misc.writeObject(dumpFile, dump);
 	}
 	@Override
-	public Dump get(String key) throws Exception{
-		this.dump = (Dump) Misc.readObject(dumpFile);
+	public Dump get(String key){
+		Dump  dump1 = new Dump();
+		dump1.setKeyStr(key);
+		this.setDump(dump1);
+		try {
+			this.dump = (Dump) Misc.readObject(dumpFile);
+		} catch (ClassNotFoundException | IOException e) {
+			this.dump = null;
+		}
 		return dump;
 	}
 	public Dump getDump() {
@@ -33,6 +43,7 @@ public class DumpDaoImpl implements DumpDao{
 	}
 	public void setDump(Dump dump) {
 		this.dump = dump;
+		setPath();
 	}
 	protected void setPath(){
 		String path = dumpInfo[0] + "/" + dump.getKeyStr() + "." + dumpInfo[1];

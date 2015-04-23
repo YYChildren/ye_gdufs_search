@@ -7,6 +7,14 @@ import org.junit.Test;
 
 public class ATest {
 	@Test
+	public void match(){
+		String filter = ".*202\\.11\\d\\..*|.*gdufs\\.edu\\.cn.*";
+		String f  = "http://202.116.192.12/rcxm/";
+		System.out.println(f.matches(filter));
+		f = "http://alumni.gdufs.edu.cn";
+		System.out.println(f.matches(filter));
+	}
+	@Test
 	public void testLib(){
 		System.out.println(System.getProperty("java.library.path"));
 	}

@@ -33,24 +33,24 @@ public class Logs {
 			e.printStackTrace();
 		}
 	}
-	public synchronized static void error_msg(String format,Object... args){
+	public synchronized static void error_msg(String msg){
 		try {
 			log_writer.print("--------------------------");
 			printNow();
 			log_writer.println(" error--------------------------");
-			log_writer.printf(format, args);
+			log_writer.print(msg);
 			log_writer.println();
 			log_writer.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	public synchronized static void info_msg(String format,Object... args){
+	public synchronized static void info_msg(String msg){
 		try {
 			log_writer.print("--------------------------");
 			printNow();
 			log_writer.println(" info--------------------------");
-			log_writer.printf(format, args);
+			log_writer.print(msg);
 			log_writer.println();
 			log_writer.flush();
 		} catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.ye.gdufs.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
@@ -20,28 +22,43 @@ import com.ye.gdufs.model.Dump;
 
 
 public class Misc {
+	public final static int BUFF_LEN = 8192;
 	private static SHFactory shf ;
 	
-	public static  void dumpObject(String key,Object obj) throws Exception {
+	
+	public static  void dumpObject(String key,Object obj){
 		try {
 			DumpDao dumpDao = new DumpDaoImpl(key, obj);
 			dumpDao.save();
 		} catch (IOException e) {
+			e.printStackTrace();
 			Logs.printStackTrace(e);
 		}
 	}
-	public static Object getDumpObject(String key) throws Exception{
-		try {
-			DumpDao dumpDao = new DumpDaoImpl();
-			Dump dump = dumpDao.get(key);
-			if (dump == null) {
-				return null;
-			}
-			return dump.getObj();
-		} catch (ClassNotFoundException | IOException e) {
-			Logs.printStackTrace(e);
+	public static Object getDumpObject(String key){
+		DumpDao dumpDao = new DumpDaoImpl();
+		Dump dump = dumpDao.get(key);
+		if (dump == null) {
 			return null;
-		} 
+		}
+		return dump.getObj();
+	}
+
+	public static void writeString(File file, String str) throws FileNotFoundException, IOException{
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),MsgUtil.CHARSET));
+		bw.write(str);
+		bw.close();
+	}
+	public static String readString(File file) throws FileNotFoundException, IOException, ClassNotFoundException{
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+		byte[] b = new byte[BUFF_LEN];
+		int len = 0;
+		StringBuilder sb = new StringBuilder();
+		while( (len = bis.read(b)) != -1 ){
+			sb.append(new String(b,0,len,MsgUtil.CHARSET ));
+		}
+		bis.close();
+		return sb.toString();
 	}
 	public static void writeObject(File file, Object ser) throws FileNotFoundException, IOException{
 		ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file))); 

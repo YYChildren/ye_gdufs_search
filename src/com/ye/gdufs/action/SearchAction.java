@@ -33,6 +33,9 @@ public class SearchAction extends ActionSupport{
 		gs.setReqStr(reqStr);
 		gs.search();
 		this.resultL = gs.getResultL();
+		if(resultL == null){
+			return;
+		}
 		this.resultCount = resultL.size();
 		int begin = (currentPage - 1)*nresults;
 		this.nresults = nresults <= 0 ? NRESULTS  : nresults; 

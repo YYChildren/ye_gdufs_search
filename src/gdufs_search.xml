@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <search>
     <!-- 每次重新开始 -->
-	<seeds update="false" depth="10" urlfilter="gdufs.edu.cn">
+	<seeds update="true" depth="120" urlfilter=".*gdufs\\.edu\\.cn.*|.*202\\.11\\d\\..*|.*192\\.168\\..*">
 	   <value>http://www.gdufs.edu.cn/</value>
 	</seeds>
-	<urlfinishupdate>true</urlfinishupdate>
 	<crawlthread update="true">
 	   <value>8</value>
 	</crawlthread>
@@ -12,12 +11,12 @@
 	   <value>1</value>
 	</pagethread>
 	
-	<data basepath="G:/gdufs_search">
-	   <page dir="crawlData" extend="cd"/>
-	   <page dir="dump" extend="dp"/>
-	   <page dir="page" extend="pg"/>
-	   <wordfreq dir="wordfreq" extend="wf"/>
-	   <wordpos dir="wordpos" extend="wp"/>
+	<data basepath="G:/gdufs_search2">
+	   <item dir="crawlData" extend="htm"/>
+	   <item dir="dump" extend="dp"/>
+	   <item dir="page" extend="pg"/>
+	   <item dir="wordfreq" extend="wf"/>
+	   <item dir="wordpos" extend="wp"/>
 	</data>
 	   
 	<!-- 分词、词性标注、实体标注、依存句法分析的模型路径 -->
@@ -31,7 +30,7 @@
 	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/ner.model</value>
 	</model>
 	
-	<logs base="D:/Administrator/eclipse_workspace/ye_gdufs_search/logs" extend="log">
+	<logs base="D:/Administrator/eclipse_workspace/gdufs_search/logs" extend="log">
 	   <error>error</error>
 	</logs>
 <!-- 	<timeout>5000</timeout> -->

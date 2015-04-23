@@ -17,6 +17,9 @@ public final class Word{
 		super();
 	}
 	@Id
+	public long getWid() {
+		return wid;
+	}
 	public void setWid(long wid) {
 		this.wid = wid;
 	}
@@ -25,9 +28,6 @@ public final class Word{
 	}
 	public String getWord() {
 		return word;
-	}
-	public long getWid() {
-		return wid;
 	}
 	public long getUidTitleCount() {
 		return uidTitleCount;
