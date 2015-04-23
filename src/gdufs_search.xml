@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <search>
     <!-- 每次重新开始 -->
-	<seeds update="true" depth="120" urlfilter=".*gdufs\\.edu\\.cn.*|.*202\\.11\\d\\..*|.*192\\.168\\..*">
+	<seeds update="true" depth="40" urlfilter=".*gdufs\\.edu\\.cn.*|.*202\\.11\\d\\..*|.*192\\.168\\..*">
 	   <value>http://www.gdufs.edu.cn/</value>
 	</seeds>
 	<crawlthread update="true">
