@@ -11,29 +11,32 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.PriorityQueue;
 
-import com.ye.gdufs.dao.PageDaoImpl;
 import com.ye.gdufs.dao.WordDaoImpl;
+import com.ye.gdufs.model.Page;
 import com.ye.gdufs.model.Word;
 
 public class Analyzer {
+	public static final double TITLE_WEIGHT = 0.382;
+	public static final double BODY_WEIGHT = 0.618;
 	private int maxHeads = 40;
 	ArrayList<WordDaoImpl> wdiArr ;
-	private Map<String,Double> wordWeight = new HashMap<>();
+	Map<String, Double> wordWeightMap;
 	private  List<Entry<Long, Double>> uidWeightList;
 	private static long urlCount;
 	static{
 		updateUrlCount();
 	}
 	public Analyzer(){}
-	public Analyzer(ArrayList<WordDaoImpl> wdiArr){ this.wdiArr = wdiArr; }
+	public Analyzer(ArrayList<WordDaoImpl> wdiArr,Map<String, Double> wordWeightMap) {
+		 this.wdiArr = wdiArr; 
+		 this.wordWeightMap = wordWeightMap;
+		 
+	}
 	public static void updateUrlCount(){
-		urlCount = PageDaoImpl.getPageCount();
+		urlCount = Page.getPageCount();
 	}
 	public List<Entry<Long, Double>> getUidWeightList() {
 		return uidWeightList;
-	}
-	public Map<String, Double> getWordWeight() {
-		return wordWeight;
 	}
 	public void analyze(){
 		Map<String,Map<Long,Double>> wordUidWeight = new HashMap<>();
@@ -43,6 +46,7 @@ public class Analyzer {
 			Long uidTCount = w.getUidTitleCount();
 			Long uidBCount = w.getUidBodyCount();
 			
+			Double wordWeight = wordWeightMap.getOrDefault(word, 1.0);
 			Double tidf =  uidTCount > 0 ? Math.log10(urlCount / uidTCount) : 0.0;
 			Double bidf = uidBCount > 0 ? Math.log10(urlCount / uidBCount) : 0.0;
 			
@@ -50,8 +54,8 @@ public class Analyzer {
 			Map<Long,Integer> uidBodyFreq = wdi.getUidBodyFreq();
 			
 			//计算词在每个uid的tf-idf
-			Map<Long,Double> uidTitleWeight = countTfIdf(tidf,uidTitleFreq);
-			Map<Long,Double> uidBodyWeight = countTfIdf(bidf,uidBodyFreq);
+			Map<Long,Double> uidTitleWeight = countTfIdf(wordWeight,tidf,uidTitleFreq);
+			Map<Long,Double> uidBodyWeight = countTfIdf(wordWeight,bidf,uidBodyFreq);
 			
 			//计算词在每个uid的权重
 			Map<Long,Double> uidWeight = countWordWeight(uidTitleWeight ,uidBodyWeight);
@@ -63,16 +67,15 @@ public class Analyzer {
 			for(Double weight : uidWeight.values()){
 				countWeight += weight;
 			}
-			wordWeight.put(word, uidWeight.size()>0 ? countWeight/uidWeight.size() : 0.0 );
 		});
 		Map<Long,Double> sentenceUidWeight =  countSentenceWeight(wordUidWeight);
 		 uidWeightList = exetactHead(sentenceUidWeight,maxHeads);
 	}
-	private Map<Long, Double> countTfIdf(Double idf,Map<Long,Integer> uidFreq){
+	private Map<Long, Double> countTfIdf(Double wordWeight,Double idf,Map<Long,Integer> uidFreq){
 		Map<Long,Double> uidWeight = new HashMap<>();
 		BiConsumer<? super Long, ? super Integer> action = (uid,freq) ->{
 			Double tf = Math.log10(1+ freq);
-			Double tfIdf = tf *  idf;
+			Double tfIdf = wordWeight * tf *  idf;
 			uidWeight.put(uid, tfIdf);
 		};
 		uidFreq.forEach(action);
@@ -81,7 +84,16 @@ public class Analyzer {
 	private Map<Long, Double> countWordWeight(Map<Long, Double> uidTitleWeight,
 			Map<Long, Double> uidBodyWeight) {
 		Map<Long,Double> uidWeight  = new HashMap<>();
-		uidBodyWeight.forEach( (uid,bw) -> uidWeight.put(uid,  bw + uidTitleWeight.getOrDefault(uid, 0.0))); 
+		uidTitleWeight.forEach((uid,tw) -> {
+			if(!uidWeight.containsKey(uid)){
+				uidWeight.put(uid,  TITLE_WEIGHT * tw +  BODY_WEIGHT * uidBodyWeight.getOrDefault(uid, 0.0));
+			}
+		});
+		uidBodyWeight.forEach( (uid,bw) -> {
+			if(!uidWeight.containsKey(uid)){
+				uidWeight.put(uid,  TITLE_WEIGHT * uidTitleWeight.getOrDefault(uid, 0.0) + BODY_WEIGHT *  bw);
+			}
+		});
 		return uidWeight;
 	}
 	private Map<Long, Double> countSentenceWeight(Map<String,Map<Long,Double>> wordUidWeight){

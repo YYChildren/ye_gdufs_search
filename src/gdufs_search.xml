@@ -30,7 +30,7 @@
 	   <value>G:/baiduyundownload/ltp-models/3.2.0/ltp-data-v3.2.0/ner.model</value>
 	</model>
 	
-	<logs base="D:/Administrator/eclipse_workspace/gdufs_search/logs" extend="log">
+	<logs base="D:/Administrator/eclipse_workspace/ye_gdufs_search/logs" extend="log">
 	   <error>error</error>
 	</logs>
 <!-- 	<timeout>5000</timeout> -->

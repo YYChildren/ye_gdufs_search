@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.ye.gdufs.global.GdufsSearch;
-import com.ye.gdufs.model.Result;
+import com.ye.gdufs.model.ResultPage;
 
 public class SearchAction extends ActionSupport{
 	private static final long serialVersionUID = -1618973736366534533L;
@@ -21,8 +21,9 @@ public class SearchAction extends ActionSupport{
 	private boolean hasPrev;
 	private boolean hasNext;
 	private String reqStr;
-	private List<Result> resultL;
-	private List<Result> subResultL;
+	private List<String> ansList;
+	private List<ResultPage> resultPageList;
+	private List<ResultPage> subResultPageList;
 	@Override
 	public String execute() throws Exception {
 		do_submit();
@@ -32,16 +33,17 @@ public class SearchAction extends ActionSupport{
 		GdufsSearch gs = new GdufsSearch();
 		gs.setReqStr(reqStr);
 		gs.search();
-		this.resultL = gs.getResultL();
-		if(resultL == null){
+		this.ansList = gs.getResult().getAnsList();
+		this.resultPageList = gs.getResult().getResultPageList();
+		if(resultPageList == null){
 			return;
 		}
-		this.resultCount = resultL.size();
+		this.resultCount = resultPageList.size();
 		int begin = (currentPage - 1)*nresults;
 		this.nresults = nresults <= 0 ? NRESULTS  : nresults; 
 		if(begin  < resultCount){
 			int end = begin + nresults > resultCount ? resultCount : begin + nresults;
-			this.subResultL = resultL.subList(begin, end);
+			this.subResultPageList = resultPageList.subList(begin, end);
 			
 			this.pageCount = (resultCount +  nresults - 1)/ nresults;
 			this.viewPageCount = viewPageCount <= pageCount ? VIEW_PAGE_COUNT : pageCount;
@@ -65,7 +67,7 @@ public class SearchAction extends ActionSupport{
 				viewPageNos.add(i);
 			}
 		}else{
-			this.subResultL = null;
+			this.subResultPageList = null;
 		}
 	}
 	public int getNresults() {
@@ -89,11 +91,14 @@ public class SearchAction extends ActionSupport{
 	public int getResultCount() {
 		return resultCount;
 	}
-	public List<Result> getResultL() {
-		return resultL;
+	public List<String> getAnsList() {
+		return ansList;
 	}
-	public List<Result> getSubResultL() {
-		return subResultL;
+	public List<ResultPage> getResultPageList() {
+		return resultPageList;
+	}
+	public List<ResultPage> getSubResultPageList() {
+		return subResultPageList;
 	}
 	public int getPageCount() {
 		return pageCount;

@@ -1,32 +1,25 @@
 package com.ye.gdufs.model;
 
+import java.util.List;
+
 public class Result {
-	private String url;
-	private String title;
-	private String body;
+	private List<ResultPage> resultPageList;
+	private List<String> ansList;
 	public Result(){}
-	public Result(String url, String title, String body) {
-		super();
-		this.url = url;
-		this.title = title;
-		this.body = body;
+	public Result(List<ResultPage> resultPageList, List<String> ansList) {
+		this.resultPageList = resultPageList;
+		this.ansList = ansList;
 	}
-	public String getUrl() {
-		return url;
+	public List<ResultPage> getResultPageList() {
+		return resultPageList;
 	}
-	public void setUrl(String url) {
-		this.url = url;
+	public void setResultPageList(List<ResultPage> resultPageList) {
+		this.resultPageList = resultPageList;
 	}
-	public String getTitle() {
-		return title;
+	public List<String> getAnsList() {
+		return ansList;
 	}
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	public String getBody() {
-		return body;
-	}
-	public void setBody(String body) {
-		this.body = body;
+	public void setAnsList(List<String> ansList) {
+		this.ansList = ansList;
 	}
 }

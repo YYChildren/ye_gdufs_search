@@ -84,7 +84,7 @@
 	</div>
 	<!--search end-->
 	<!--show all start-->
-	<s:if test="subResultL != null">
+	<s:if test="subResultPageList != null">
 		<div id="trynow" class="container-fluid row3">
 			<div class="container">
 				<div class="row">
@@ -94,7 +94,17 @@
 									value="resultCount" /></span> 条结果
 						</p>
 						<br />
-						<s:iterator value="subResultL" var="reulstl">
+	                    <s:if test="ansList != null && currentPage == 1">
+	                       <hr />
+	                       <p class="result_title">可能答案:</p>
+	                       <s:iterator value="ansList" var="ans">
+		                       <p class="result_body">
+	                                <s:property value="#ans" escape="false" />
+	                            </p>
+	                       </s:iterator>
+	                       <hr />
+	                    </s:if>
+						<s:iterator value="subResultPageList" var="reulstl">
 							<p class="result_title">
 								<a target="_blank" href="<s:property value="#reulstl.url" />"><s:property
 										value="#reulstl.title" escape="false" /></a>
