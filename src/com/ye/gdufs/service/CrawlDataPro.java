@@ -26,9 +26,8 @@ import com.ye.gdufs.util.MsgUtil;
 public class CrawlDataPro implements java.io.Serializable {
 	private static final long serialVersionUID = 2423023121219596833L;
 	private final static String KEY = "CrawlDataPro";
-	public static final int TIMEOUT = 20000;
-	private static final int RETRY_TIME = 3;
-	private static final int NOT_MATCH_ADD = 1;
+	public static final int TIMEOUT = 10000;
+	private static final int NOT_MATCH_ADD = 0;
 	private static final String URL_regex = "^https?.*";
 	private static MPQ mpq = MPQ.getInstance();
 	private static CrawlDataPro crawl = null;
@@ -84,8 +83,6 @@ public class CrawlDataPro implements java.io.Serializable {
 		doUpdate();
 		loopCrawl();
 		CrawlDataPro.crawl = null;
-		System.err.println("Crawl stopped");
-		Logs.info_msg("Crawl stopped");
 	}
 
 	private void doUpdate() {
@@ -115,14 +112,27 @@ public class CrawlDataPro implements java.io.Serializable {
 	private void loopCrawl() {
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors
 				.newFixedThreadPool(nThreads);
-		int readyEmptyTime = 0;
 		while (isStarted) {
 			// 没有空闲线程
-			if (executor.getActiveCount() == this.nThreads
-					|| urlsReady.isEmpty()) {
+			if (executor.getActiveCount() == this.nThreads){
+				Logs.info_msg("Waiting: Threads are all used");
+				System.err.println("Waiting: Threads are all used");
 				dump();
 				sleep();
 				continue;
+			}
+			if(executor.getActiveCount() != 0 && urlsReady.isEmpty()){
+				Logs.info_msg("Waiting: Threads are running");
+				System.err.println("Waiting: Threads are running");
+				dump();
+				sleep();
+				continue;
+			}
+			if (executor.getActiveCount() == 0 && urlsReady.isEmpty()) {
+				System.out.println(executor.getActiveCount());
+				System.out.println(executor.getPoolSize());
+				stop();
+				break;
 			}
 			SimpleEntry<String, Integer> urlDepth = null;
 			do {
@@ -137,25 +147,17 @@ public class CrawlDataPro implements java.io.Serializable {
 					urlDepth = urlDepthTmp;
 					break;
 				} else {
-					Logs.info_msg("MaxDepth:" + url);
-					System.err.println("MaxDepth:" + url);
+					Logs.info_msg("MaxDepth: "+ depth + " Url:"+ url);
+					System.err.println("MaxDepth: "+ depth + " Url:"+ url);
 				}
 			} while (true);
 			if (urlDepth != null) {
-				readyEmptyTime = 0;
 				CrawlRun command = new CrawlRun(urlDepth);
 				executor.execute(command);
-			} else {
-				dump();
-				++readyEmptyTime;
-				Logs.info_msg("RetryTime:" + readyEmptyTime);
-			}
-			if (readyEmptyTime >= RETRY_TIME) {
-				readyEmptyTime = 0;
-				break;
-			}
+			} 
 		}
-		dump();
+		stopped();
+		
 	}
 
 	private void sleep() {
@@ -183,6 +185,12 @@ public class CrawlDataPro implements java.io.Serializable {
 			sleep();
 		}
 	}
+	private void stopped() {
+		dump();
+		Logs.info_msg("Crawl stopped");
+		System.err.println("Crawl stopped");
+	}
+
 
 	private class CrawlRun implements Runnable {
 		SimpleEntry<String, Integer> urlDepth;
@@ -218,7 +226,7 @@ public class CrawlDataPro implements java.io.Serializable {
 				long uid = mpq.hash(url);
 				String serName = Long.toHexString(uid);
 				data.setUid(uid);
-				data.setUrl(url);
+				data.setUrl("url: " +url+" depth: "+depth);
 				data.setContentMd5(contentMd5);
 				data.setSerName(serName);
 				crd.setCrawlData(data);
