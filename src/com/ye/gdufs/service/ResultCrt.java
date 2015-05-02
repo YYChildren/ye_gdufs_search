@@ -86,17 +86,14 @@ public class ResultCrt {
 			}
 			
 			Map<String, Double> wordWeightMap = rc.getwordWeightMap();
-			String quesType = rc.getType();
 			Analyzer uidAnalyze = new Analyzer(wdiArr,wordWeightMap);
 			uidAnalyze.analyze();
 			
 			List<Entry<Long, Double>> uidWeightList = uidAnalyze.getUidWeightList();
-			Extractor extractor = new Extractor(wdiArr,wordWeightMap,quesType, uidWeightList);
+			Extractor extractor = new Extractor(wdiArr,wordWeightMap, uidWeightList);
 			extractor.extract();
-			List<String> ansList = extractor.getAnsList();
 			List<ResultPage> resultPageList = extractor.getResultList();
 			result = new Result();
-			result.setAnsList(ansList);
 			result.setResultPageList(resultPageList);
 		} catch (Exception e) {
 			e.printStackTrace();

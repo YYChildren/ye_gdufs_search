@@ -13,12 +13,9 @@ public class HibernateUtil {
     @SuppressWarnings("deprecation")
 	private static SessionFactory buildSessionFactory() {
         try {
-			//return new Configuration().configure().buildSessionFactory(
-			//    new StandardServiceRegistryBuilder().build() );
         	return new Configuration().configure().buildSessionFactory();
         }
         catch (Throwable ex) {
-            // Make sure you log the exception, as it might be swallowed
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }

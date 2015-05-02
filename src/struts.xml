@@ -7,6 +7,7 @@
 	<constant name="struts.enable.DynamicMethodInvocation" value="false" />
 	<constant name="struts.devMode" value="false" />
 	<package name="front" extends="struts-default" namespace="/">
+	    <default-action-ref name="search" />
 		<action name="search" class="com.ye.gdufs.action.SearchAction">
 			<result name="success">/index.jsp</result>
 		</action>

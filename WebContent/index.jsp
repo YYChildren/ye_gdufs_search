@@ -94,16 +94,6 @@
 									value="resultCount" /></span> 条结果
 						</p>
 						<br />
-	                    <s:if test="ansList != null && currentPage == 1">
-	                       <hr />
-	                       <p class="result_title">可能答案:</p>
-	                       <s:iterator value="ansList" var="ans">
-		                       <p class="result_body">
-	                                <s:property value="#ans" escape="false" />
-	                            </p>
-	                       </s:iterator>
-	                       <hr />
-	                    </s:if>
 						<s:iterator value="subResultPageList" var="reulstl">
 							<p class="result_title">
 								<a target="_blank" href="<s:property value="#reulstl.url" />"><s:property
@@ -120,7 +110,9 @@
 						</s:iterator>
 						<s:if test="hasPrev">
 							<a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=1">首页</a>
-							<a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage-1"/>">上一页</a>
+						</s:if>
+						<s:if test="currentPage >1">
+						   <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage-1"/>">上一页</a>
 						</s:if>
 						<s:iterator value="viewPageNos"  var="viewPageNo">
 						      <s:if test="#viewPageNo == currentPage">
@@ -130,8 +122,10 @@
 						          <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="#viewPageNo"/>"><s:property value="#viewPageNo" /></a>
                               </s:else>
 						</s:iterator>
+						<s:if test="currentPage < pageCount">
+						    <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage+1"/>">下一页</a>
+						</s:if>
                         <s:if test="hasNext">
-                            <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage+1"/>">下一页</a>
                             <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="pageCount"/>">末页</a>
                         </s:if>
                         <br/>

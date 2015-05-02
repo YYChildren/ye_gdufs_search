@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.ye.gdufs.global.GdufsSearch;
+import com.ye.gdufs.model.Result;
 import com.ye.gdufs.model.ResultPage;
 
 public class SearchAction extends ActionSupport{
@@ -21,7 +22,6 @@ public class SearchAction extends ActionSupport{
 	private boolean hasPrev;
 	private boolean hasNext;
 	private String reqStr;
-	private List<String> ansList;
 	private List<ResultPage> resultPageList;
 	private List<ResultPage> subResultPageList;
 	@Override
@@ -33,9 +33,12 @@ public class SearchAction extends ActionSupport{
 		GdufsSearch gs = new GdufsSearch();
 		gs.setReqStr(reqStr);
 		gs.search();
-		this.ansList = gs.getResult().getAnsList();
-		this.resultPageList = gs.getResult().getResultPageList();
-		if(resultPageList == null){
+		Result rs = gs.getResult();
+		if(rs == null){
+			return;
+		}
+		this.resultPageList = rs.getResultPageList();
+		if(resultPageList == null || resultPageList.isEmpty()){
 			return;
 		}
 		this.resultCount = resultPageList.size();
@@ -90,9 +93,6 @@ public class SearchAction extends ActionSupport{
 	}
 	public int getResultCount() {
 		return resultCount;
-	}
-	public List<String> getAnsList() {
-		return ansList;
 	}
 	public List<ResultPage> getResultPageList() {
 		return resultPageList;
