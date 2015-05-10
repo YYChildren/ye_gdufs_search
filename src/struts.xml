@@ -11,6 +11,9 @@
 		<action name="search" class="com.ye.gdufs.action.SearchAction">
 			<result name="success">/index.jsp</result>
 		</action>
+		<action name="search_ch" class="com.ye.gdufs.action.SearchAction">
+            <result name="success">/index_ch.jsp</result>
+        </action>
 	</package>
 	<!-- Add packages here -->
 

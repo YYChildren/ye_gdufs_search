@@ -40,10 +40,10 @@
      			   <tr><td><br></td>
       			       <td><br></td>
       			       <td><br></td>
-      			       <td><br>English  |  <a href="index_ch.jsp">中文</a></td>
+      			       <td><br><a href="index.jsp">English</a>  |  中文</td>
       			  </tr>
       			  <tr height="80px">
-        		    <td><div class="form-top">GDUFS Search Engine</div></td>
+        		    <td><div class="form-top">广外搜索引擎</div></td>
         		    <td width="78%"></td>
 					<td rowspan="2" width="2%">   <div class="logo_placement">
 					        <img src="./Hostrocket_files/image/logo3.png" alt="#" align="right" style="margin-left: 0px; border="0px">
@@ -69,11 +69,11 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-6 col-sm-6 form-holder">
-					<form action="<%=contextPath%>/search" id="demoform"
+					<form action="<%=contextPath%>/search_ch" id="demoform"
 						method="get">
 						<div class="form-items-holder">
-							<input type="text" name="reqStr" placeholder="Please input" value="<s:property value="reqStr" />">
-							<input type="submit" value="Search">
+							<input type="text" name="reqStr" placeholder="请输入" value="<s:property value="reqStr" />">
+							<input type="submit" value="搜索">
 						</div>
 					</form>
 				</div>
@@ -115,20 +115,20 @@
 							<br />
 						</s:iterator>
 						<s:if test="hasPrev">
-							<a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=1">首页</a>
-							<a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage-1"/>">上一页</a>
+							<a href="<%=contextPath%>/search_ch?reqStr=<s:property value="reqStr" />&currentPage=1">首页</a>
+							<a href="<%=contextPath%>/search_ch?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage-1"/>">上一页</a>
 						</s:if>
 						<s:iterator value="viewPageNos"  var="viewPageNo">
 						      <s:if test="#viewPageNo == currentPage">
 						          <s:property value="currentPage" />
 						      </s:if>
 						      <s:else>
-						          <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="#viewPageNo"/>"><s:property value="#viewPageNo" /></a>
+						          <a href="<%=contextPath%>/search_ch?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="#viewPageNo"/>"><s:property value="#viewPageNo" /></a>
                               </s:else>
 						</s:iterator>
                         <s:if test="hasNext">
-                            <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage+1"/>">下一页</a>
-                            <a href="<%=contextPath%>/search?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="pageCount"/>">末页</a>
+                            <a href="<%=contextPath%>/search_ch?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="currentPage+1"/>">下一页</a>
+                            <a href="<%=contextPath%>/search_ch?reqStr=<s:property value="reqStr" />&currentPage=<s:property value="pageCount"/>">末页</a>
                         </s:if>
                         <br/>
                         <br/>
@@ -145,17 +145,17 @@
 			<div class="row">
 				<div class="col-md-7 col-sm-7 col-xs-8" style="padding-top: 50px;">
 					<p class="big-text">
-						<span style="color: #ffffff;">Fast.</span><br> <span
-							style="color: #ffffff;">GDUFS Search Engine<br> Hi<br>
-							hi, user
+						<span style="color: #423852;">更快</span><br> <span
+							style="color: #ffffff;">广外搜索引擎<br> 您好<br>
+							欢迎使用
 						</span>
 					</p>
-					<p class="small-text">Fast &amp; GDUFS Search Engine</p>
+					<p class="small-text">更快更专注的 &amp; 广外搜索引擎</p>
 					<br> <br>
 
 				</div>
 				 <div class="col-md-5 col-sm-5 col-xs-4">
-					<canvas id="canvas" width="820px" height="425px"></canvas>
+					<canvas id="canvas" width="820px" height="350px"></canvas>
 				</div> 
 			</div>
 

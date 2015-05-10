@@ -8,6 +8,10 @@ import java.util.UUID;
 import org.junit.Test;
 
 public class MPQTest {
+	@Test
+	public void test(){
+		System.out.println(MPQ.getInstance().hash("http://www1.gdufs.edu.cn/gwkyc/download.asp?BigClassName=项目管理"));
+	}
 
 	@Test
 	public void testDhash() throws NoSuchAlgorithmException,

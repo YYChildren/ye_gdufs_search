@@ -220,13 +220,13 @@ public class CrawlDataPro implements java.io.Serializable {
 					System.err.println("contentMd5: "+contentMd5);
 					return;
 				}
-				System.out.println(url);
+				System.out.println("url: " +url+" depth: "+depth);
 				CrawlDataDao crd = new CrawlDataDaoImpl();
 				CrawlData data = new CrawlData();
 				long uid = mpq.hash(url);
 				String serName = Long.toHexString(uid);
 				data.setUid(uid);
-				data.setUrl("url: " +url+" depth: "+depth);
+				data.setUrl(url);
 				data.setContentMd5(contentMd5);
 				data.setSerName(serName);
 				crd.setCrawlData(data);
